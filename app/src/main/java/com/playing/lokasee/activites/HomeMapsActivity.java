@@ -1,6 +1,7 @@
 package com.playing.lokasee.activites;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
@@ -12,6 +13,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.playing.lokasee.R;
 import com.playing.lokasee.util.GPSTracker;
+
+import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
+import rx.functions.Action1;
 
 /**
  * Created by mexan on 8/18/15.
@@ -46,20 +50,15 @@ public class HomeMapsActivity extends AppCompatActivity implements HomeMapsView,
 
     @Override
     public void mapsSetup() {
-        gpsTracker = new GPSTracker(mContext);
 
-        // if gps not enabled then show alert to user
-        // if gps enabled get location of user
-        if(!gpsTracker.canGetLocation()){
-
-            gpsTracker.showSettingsAlert();
-
-        }else{
-
-            // Get location user
-            latitude = gpsTracker.getLatitude();
-            longitude = gpsTracker.getLongitude();
-        }
+        ReactiveLocationProvider reactiveLocationProvider = new ReactiveLocationProvider(mContext);
+        reactiveLocationProvider.getLastKnownLocation().subscribe(new Action1<Location>() {
+            @Override
+            public void call(Location location) {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+            }
+        });
     }
 
     @Override
