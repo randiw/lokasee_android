@@ -5,7 +5,13 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.parse.DeleteCallback;
+import com.parse.FindCallback;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -13,15 +19,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        testParse();
+        retrieveData();
     }
 
-    private void testParse(){
-        ParseObject testObject = new ParseObject("Lokasee");
-        testObject.put("Name", "Mexan Juadha");
-        testObject.saveInBackground();
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -29,6 +30,19 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
+    private void retrieveData(){
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("user");
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                for(int i=0; i < list.size(); i++){
+                    System.out.println(list.get(i).get("name"));
+                }
+            }
+        });
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
