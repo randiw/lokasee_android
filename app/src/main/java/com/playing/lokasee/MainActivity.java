@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void testParse(){
         ParseObject testObject = new ParseObject("Lokasee");
-        testObject.put("foo", "barbar");
+        testObject.put("Name", "Mexan Juadha");
         testObject.saveInBackground();
     }
 
