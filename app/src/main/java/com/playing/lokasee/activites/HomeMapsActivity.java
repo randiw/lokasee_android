@@ -1,20 +1,29 @@
 package com.playing.lokasee.activites;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.GetCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.playing.lokasee.R;
 import com.playing.lokasee.util.GPSTracker;
 
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
+import rx.Subscription;
 import rx.functions.Action1;
 
 /**
@@ -22,7 +31,8 @@ import rx.functions.Action1;
  */
 public class HomeMapsActivity extends AppCompatActivity implements HomeMapsView, OnMapReadyCallback {
 
-    private GoogleMap gMap;
+
+    private final GoogleMap gMap = null;
     private GPSTracker gpsTracker;
     private Context mContext;
 
@@ -30,16 +40,25 @@ public class HomeMapsActivity extends AppCompatActivity implements HomeMapsView,
     private double latitude = 0;
     private double longitude = 0;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContext =  this;
+        mContext = this;
         initView();
-        mapsSetup();
+
+
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
 
     @Override
     public void initView() {
@@ -51,24 +70,51 @@ public class HomeMapsActivity extends AppCompatActivity implements HomeMapsView,
     @Override
     public void mapsSetup() {
 
-        ReactiveLocationProvider reactiveLocationProvider = new ReactiveLocationProvider(mContext);
-        reactiveLocationProvider.getLastKnownLocation().subscribe(new Action1<Location>() {
+
+    }
+
+    @Override
+    public void onMapReady(final GoogleMap googleMap) {
+
+        LocationRequest request = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setNumUpdates(5).setInterval(100);
+
+        ReactiveLocationProvider loProv = new ReactiveLocationProvider(mContext);
+        Subscription subScript = loProv.getUpdatedLocation(request).subscribe(new Action1<Location>() {
             @Override
             public void call(Location location) {
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
+
+                googleMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                        .title("Marker"));
+
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14));
+
+                // Update current lat & lon to parse
+                updateLocation(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
             }
         });
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
 
+    private void updateLocation(final String lat, final String lon) {
 
-        googleMap.addMarker(new MarkerOptions()
-                .position(new LatLng(latitude, longitude))
-                .title("Marker"));
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
 
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 14));
+        query.getInBackground("OI9plXpAj3", new GetCallback<ParseObject>() {
+            @Override
+            public void done(ParseObject parseObject, ParseException e) {
+
+                if (e == null) {
+
+                    parseObject.put("lat", lat);
+                    parseObject.put("long", lon);
+                    parseObject.saveInBackground();
+
+                }
+            }
+        });
     }
+
 }
