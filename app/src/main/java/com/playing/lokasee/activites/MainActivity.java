@@ -1,4 +1,4 @@
-package com.playing.lokasee;
+package com.playing.lokasee.activites;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +10,7 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.playing.lokasee.R;
 
 import java.util.List;
 

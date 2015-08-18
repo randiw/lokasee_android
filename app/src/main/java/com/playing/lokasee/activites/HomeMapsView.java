@@ -1,4 +1,4 @@
-package com.playing.lokasee.homemaps.view;
+package com.playing.lokasee.activites;
 
 /**
  * Created by mexan on 8/18/15.
