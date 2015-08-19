@@ -6,8 +6,8 @@ android {
 
     defaultConfig {
         applicationId "com.playing.lokasee"
-        minSdkVersion 19
-        targetSdkVersion 22
+        minSdkVersion 15
+        targetSdkVersion 17
         versionCode 1
         versionName "1.0"
     }
@@ -29,5 +29,5 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:7.5.0'
     compile 'pl.charmas.android:android-reactive-location:0.7@aar'
     compile 'io.reactivex:rxjava:1.0.13'
-
+    compile 'com.facebook.android:facebook-android-sdk:4.0.0'
 }

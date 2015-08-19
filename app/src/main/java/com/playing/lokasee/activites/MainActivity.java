@@ -13,14 +13,21 @@ import com.parse.ParseQuery;
 import com.playing.lokasee.R;
 
 import java.util.List;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 
 public class MainActivity extends AppCompatActivity {
+
+    CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         retrieveData();
+        FacebookSdk.sdkInitialize(this.getApplicationContext());
+
     }
 
 
@@ -58,5 +65,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Logs 'install' and 'app activate' App Events.
+        AppEventsLogger.activateApp(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Logs 'app deactivate' App Event.
+        AppEventsLogger.deactivateApp(this);
     }
 }
