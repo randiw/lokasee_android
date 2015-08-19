@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        retrieveData();
         FacebookSdk.sdkInitialize(this.getApplicationContext());
 
     }
@@ -39,17 +38,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void retrieveData(){
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("user");
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
-                for(int i=0; i < list.size(); i++){
-                    System.out.println(list.get(i).get("name"));
-                }
-            }
-        });
-    }
+
 
 
     @Override

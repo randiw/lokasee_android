@@ -1,6 +1,8 @@
 package com.playing.lokasee.activites;
 
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,11 +13,15 @@ import com.facebook.FacebookException;
 import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.SaveCallback;
 import com.playing.lokasee.R;
 
 import java.util.ArrayList;
-import com.facebook.*;
+
+import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
+import rx.functions.Action1;
 
 /**
  * Created by nabilla on 8/18/15.
@@ -25,12 +31,17 @@ public class LoginActivity extends BaseActivity {
     private static final String tag = LoginActivity.class.getSimpleName();
 
     LoginButton loginButton;
-    CallbackManager callbackManager ;
+    CallbackManager callbackManager;
+
+
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        mContext = this;
 
         loginButton = (LoginButton) findViewById(R.id.login_button);
         loginButton.setReadPermissions("public_profile");
@@ -43,40 +54,77 @@ public class LoginActivity extends BaseActivity {
                 Log.d(tag, "On Success");
 
                 Profile profile = Profile.getCurrentProfile();
-                if(profile!=null && isLoginFb()){
+                if (profile != null && isLoginFb()) {
                     String idFb = profile.getId().toString();
                     String nama = profile.getName().toString();
                     SetSharedPrefs(LoginActivity.this, idFb, nama, "", "");
                     ArrayList<String> dataUser = new ArrayList<String>();
                     dataUser = GetSharedPrefs(LoginActivity.this);
-                    Log.e(tag, "NAMA: "+dataUser.get(1).toString());
+                    Log.e(tag, "NAMA: " + dataUser.get(1).toString());
+                    if (profile != null) {
 
-                    Intent i = new Intent(getApplicationContext(), HomeMapsActivity.class);
-                    startActivity(i);
-                    finish();
+                        Log.d(tag, "On Success Profile");
+                        saveData(profile.getId().toString(), profile.getName().toString());
+
+                    }
+
                 }
+
             }
 
             @Override
             public void onCancel() {
-                // App code
                 Log.v("facebook-onCancel", "cancelled");
             }
 
             @Override
-            public void onError(FacebookException exception) {
-                Log.v("facebook-onError", exception.getMessage());
+            public void onError(FacebookException e) {
+                Log.v("facebook-onError", e.getMessage());
             }
+
         });
     }
 
-    private void testParse(String userId, String userName){
-        ParseObject testObject = new ParseObject("User");
-        testObject.put("userId", userId);
-        testObject.put("name", userName);
-        testObject.put("lat", "-6.2330249");
-        testObject.put("long", "106.8119497");
-        testObject.saveInBackground();
+
+    private void saveData(final String userId, final String userName) {
+
+        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(mContext);
+
+        locationProvider.getLastKnownLocation()
+                .subscribe(new Action1<Location>() {
+                    @Override
+                    public void call(Location location) {
+
+                        // if location detected then save data to parse
+
+                        String lat = String.valueOf(location.getLatitude());
+                        String lon = String.valueOf(location.getLongitude());
+
+                        ParseObject testObject = new ParseObject("User");
+                        testObject.put("userId", userId);
+                        testObject.put("name", userName);
+                        testObject.put("lat", lat);
+                        testObject.put("long", lon);
+
+                        testObject.saveInBackground(new SaveCallback() {
+                            @Override
+                            public void done(ParseException e) {
+
+                                if (e == null) {
+
+                                    Intent i = new Intent(getApplicationContext(), HomeMapsActivity.class);
+                                    startActivity(i);
+                                    finish();
+
+                                } else {
+
+                                    e.printStackTrace();
+
+                                }
+                            }
+                        });
+                    }
+                });
     }
 
     @Override
