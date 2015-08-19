@@ -17,6 +17,9 @@ import com.playing.lokasee.R;
 import java.util.ArrayList;
 import com.facebook.*;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Created by nabilla on 8/18/15.
  */
@@ -24,7 +27,7 @@ public class LoginActivity extends BaseActivity {
 
     private static final String tag = LoginActivity.class.getSimpleName();
 
-    LoginButton loginButton;
+    @Bind(R.id.login_button) LoginButton loginButton;
     CallbackManager callbackManager ;
 
     @Override
@@ -32,7 +35,7 @@ public class LoginActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        loginButton = (LoginButton) findViewById(R.id.login_button);
+        ButterKnife.bind(this);
         loginButton.setReadPermissions("public_profile");
         callbackManager = CallbackManager.Factory.create();
 
@@ -84,8 +87,5 @@ public class LoginActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
         loginButton.setVisibility(View.GONE);
-        Intent i = new Intent(getApplicationContext(), HomeMapsActivity.class);
-        startActivity(i);
-        finish();
     }
 }
