@@ -1,31 +1,26 @@
 package com.playing.lokasee.activites;
 
-import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageInstaller;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.Profile;
-import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.parse.ParseObject;
 import com.playing.lokasee.R;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import com.facebook.*;
 
 /**
  * Created by nabilla on 8/18/15.
  */
-public class LoginActivity extends Activity {
+public class LoginActivity extends BaseActivity {
 
     private static final String tag = LoginActivity.class.getSimpleName();
 
@@ -46,9 +41,15 @@ public class LoginActivity extends Activity {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Log.d(tag, "On Success");
+
                 Profile profile = Profile.getCurrentProfile();
-                if(profile!=null){
-                    testParse(profile.getId().toString(), profile.getName().toString());
+                if(profile!=null && isLoginFb()){
+                    String idFb = profile.getId().toString();
+                    String nama = profile.getName().toString();
+                    SetSharedPrefs(LoginActivity.this, idFb, nama, "", "");
+                    ArrayList<String> dataUser = new ArrayList<String>();
+                    dataUser = GetSharedPrefs(LoginActivity.this);
+                    Log.e(tag, "NAMA: "+dataUser.get(1).toString());
 
                     Intent i = new Intent(getApplicationContext(), HomeMapsActivity.class);
                     startActivity(i);
@@ -81,7 +82,10 @@ public class LoginActivity extends Activity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(callbackManager.onActivityResult(requestCode, resultCode,data))
-            return;
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+        loginButton.setVisibility(View.GONE);
+        Intent i = new Intent(getApplicationContext(), HomeMapsActivity.class);
+        startActivity(i);
+        finish();
     }
 }
