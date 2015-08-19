@@ -34,6 +34,7 @@ public class SplashActivity extends BaseActivity{
                     Intent i = new Intent(getApplicationContext(), LoginActivity.class);
                     startActivity(i);
                 }
+
                 finish();
             }
         }, SPLASH_TIME);
