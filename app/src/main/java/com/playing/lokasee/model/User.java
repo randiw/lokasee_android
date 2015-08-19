@@ -10,6 +10,13 @@ public class User {
     private Double lat;
     private Double lng;
 
+    public User(String userId, String name, Double lat, Double lng){
+        this.userId = userId;
+        this.name = name;
+        this.lat = lat;
+        this.lng = lng;
+    }
+
     public String getUserId() {
         return userId;
     }

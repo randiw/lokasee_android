@@ -40,6 +40,7 @@ public class SplashActivity extends BaseActivity{
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    //Intent i = new Intent(SplashActivity.this, HomeMapsActivity.class);
                     Intent i = new Intent(SplashActivity.this, HomeMapsActivity.class);
                     startActivity(i);
                     finish();
@@ -49,7 +50,6 @@ public class SplashActivity extends BaseActivity{
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    getApplicationContext().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE).edit().clear().commit();
                     Intent i = new Intent(SplashActivity.this, LoginActivity.class);
                     startActivity(i);
                     finish();

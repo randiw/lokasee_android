@@ -52,10 +52,9 @@ public class BaseActivity extends Activity {
 
     public Boolean isLogin(Context context){
         String prefs = GetSharedPrefs(context).get(0).toString();
-        if(!prefs.equals("") && isLoginFb())
+        if(isLoginFb())
             return true;
         else{
-            context.getSharedPreferences(getString(R.string.preference_file_key),Context.MODE_PRIVATE).edit().clear().commit();
             return false;
         }
     }
