@@ -5,7 +5,7 @@ package com.playing.lokasee.util;
  */
 public interface UtilStatic {
 
-     String PARSE_APP_ID = "oE0CnoKunChmRMMjVSBIKpSUOL2CPwcHTY8MNbvj";
-     String PARSE_ClIENT_ID = "caIUqEhHZOCDRlDSqEaJQlg6FUtRhZGUjvBkhyUV";
+     String PARSE_APP_ID = "Gm627EwISraYA7VbpAKY0jgVpvL42uXnZMXIS9qv";
+     String PARSE_ClIENT_ID = "FP5864k1ryudSZjTNGhrtltuYTe1qWwzjM2TuQnR";
 
 }

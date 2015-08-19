@@ -8,12 +8,12 @@ import com.playing.lokasee.util.UtilStatic;
 /**
  * Created by mexan on 8/18/15.
  */
-public class LokaseeApplication extends Application implements UtilStatic {
+public class LokaseeApplication extends Application {
 
     @Override
     public void onCreate() {
         super.onCreate();
         Parse.enableLocalDatastore(this);
-        Parse.initialize(this, PARSE_APP_ID, PARSE_ClIENT_ID);
+        Parse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_id));
     }
 }
