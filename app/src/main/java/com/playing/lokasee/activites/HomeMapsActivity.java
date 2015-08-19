@@ -1,11 +1,9 @@
 package com.playing.lokasee.activites;
 
 import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -15,12 +13,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.GetCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.playing.lokasee.R;
-import com.playing.lokasee.util.GPSTracker;
 
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Subscription;
@@ -32,13 +28,9 @@ import rx.functions.Action1;
 public class HomeMapsActivity extends AppCompatActivity implements HomeMapsView, OnMapReadyCallback {
 
 
-    private final GoogleMap gMap = null;
-    private GPSTracker gpsTracker;
     private Context mContext;
+    private Subscription subCript;
 
-    // Location variable
-    private double latitude = 0;
-    private double longitude = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,11 +69,12 @@ public class HomeMapsActivity extends AppCompatActivity implements HomeMapsView,
     public void onMapReady(final GoogleMap googleMap) {
 
         LocationRequest request = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setNumUpdates(5).setInterval(100);
+                                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                                    .setNumUpdates(5)
+                                    .setInterval(100);
 
         ReactiveLocationProvider loProv = new ReactiveLocationProvider(mContext);
-        Subscription subScript = loProv.getUpdatedLocation(request).subscribe(new Action1<Location>() {
+        subCript = loProv.getUpdatedLocation(request).subscribe(new Action1<Location>() {
             @Override
             public void call(Location location) {
 
