@@ -31,6 +31,25 @@ public class UserRepository {
         return user;
     }
 
+    public static User findByFacebook(String facebookId) {
+        List<User> users = getUserDao().queryBuilder().where(UserDao.Properties.Facebook_id.eq(facebookId)).limit(1).list();
+        if(!RepoTools.isRowAvailable(users)) {
+            return null;
+        }
+
+        User user = users.get(0);
+        return user;
+    }
+
+    public static List<User> getAll() {
+        List<User> users = getUserDao().queryBuilder().list();
+        if(RepoTools.isRowAvailable(users)) {
+            return null;
+        }
+
+        return users;
+    }
+
     private static UserDao getUserDao() {
         return LokaseeApplication.getInstance().getDaoSession().getUserDao();
     }

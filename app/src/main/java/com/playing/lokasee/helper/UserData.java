@@ -32,6 +32,11 @@ public class UserData {
         DataHelper.saveData(LONGITUDE, longitude);
     }
 
+    public static String getFacebookId() {
+        String facebookId = DataHelper.getString(FACEBOOK_ID);
+        return facebookId;
+    }
+
     public static String getUsername() {
         String username = DataHelper.getString(USERNAME);
         return username;

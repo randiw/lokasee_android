@@ -12,6 +12,7 @@ import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
 import com.playing.lokasee.User;
 import com.playing.lokasee.UserDao;
+import com.playing.lokasee.repositories.UserRepository;
 
 import java.util.List;
 
@@ -77,18 +78,33 @@ public class ParseHelper {
         });
     }
 
-    public void getAllUser() {
+    public void getAllUser(final OnParseQueryListener onParseQueryListener) {
         ParseQuery<ParseObject> locationQuery = new ParseQuery<ParseObject>(LOCATION);
+        locationQuery.whereNotEqualTo(UserDao.Properties.Facebook_id.name, UserData.getFacebookId());
         locationQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
                 if (e == null) {
                     for (ParseObject locationObject : list) {
-                        User user = new User();
+                        String name = locationObject.getString(UserDao.Properties.Name.name);
+                        String facebook_id = locationObject.getString(UserDao.Properties.Facebook_id.name);
+                        double latitude = locationObject.getDouble(UserDao.Properties.Latitude.name);
+                        double longitude = locationObject.getDouble(UserDao.Properties.Longitude.name);
 
+                        User user = new User();
+                        user.setObject_id(locationObject.getObjectId());
+                        user.setName(name);
+                        user.setFacebook_id(facebook_id);
+                        user.setLatitude(latitude);
+                        user.setLongitude(longitude);
+
+                        UserRepository.save(user);
                     }
+
+                    onParseQueryListener.onParseQuery(list);
                 } else {
                     Log.e(TAG, "get list location parseException " + e.getMessage());
+                    onParseQueryListener.onError(e);
                 }
             }
         });
@@ -109,18 +125,25 @@ public class ParseHelper {
                     onSaveParseObjectListener.onSaveParseObject(locationObject);
                 } else {
                     Log.e(TAG, "save location parseException: " + e.getMessage());
+                    onSaveParseObjectListener.onError(e);
                 }
             }
         });
     }
 
-    public interface OnSaveParseObjectListener {
+    public abstract interface OnParseListener {
+        public void onError(ParseException pe);
+    }
+
+    public interface OnSaveParseObjectListener extends OnParseListener {
         public void onSaveParseObject(ParseObject parseObject);
     }
 
-    public interface OnLogParseListener {
+    public interface OnLogParseListener extends OnParseListener {
         public void onSuccess(ParseUser parseUser);
+    }
 
-        public void onError(ParseException pe);
+    public interface OnParseQueryListener extends OnParseListener {
+        public void onParseQuery(List<ParseObject> parseObjectList);
     }
 }
