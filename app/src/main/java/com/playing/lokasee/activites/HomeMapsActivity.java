@@ -1,21 +1,16 @@
 package com.playing.lokasee.activites;
 
-import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.KeyEvent;
 
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.CountCallback;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -26,115 +21,152 @@ import com.playing.lokasee.R;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
-import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
-import rx.functions.Func1;
 
 /**
  * Created by mexan on 8/18/15.
  */
-public class HomeMapsActivity extends AppCompatActivity implements HomeMapsView, OnMapReadyCallback {
+public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback {
 
+    private static final String TAG = HomeMapsActivity.class.getSimpleName();
 
-    private Context mContext;
+    private GoogleMap googleMap;
+
     private Subscription subCript;
     private Double lat, lng;
     private ArrayList<Marker> mMarkers;
-    private GoogleMap gMap;
-
+    private ArrayList<String> userData;
+    int num;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContext = this;
-        initView();
-    }
+        setupLayout(R.layout.home_maps);
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public void initView() {
-        setContentView(R.layout.home_maps);
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
-    @Override
-    public void mapsSetup() {
-
-    }
-
     private void drawMarker(final GoogleMap nMap) {
         mMarkers = new ArrayList<>();
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
-        query.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> list, ParseException e) {
+//        ParseQuery<ParseObject> query = ParseQuery.getQuery("Location");
+//        query.findInBackground(new FindCallback<ParseObject>() {
+//            @Override
+//            public void done(List<ParseObject> list, ParseException e) {
+//
+//                if (e == null) {
+//
+//                    for (int i = 0; i < list.size(); i++) {
+//
+//                        Double lat = (Double) list.get(i).getNumber("latitude");
+//                        Double lon = (Double) list.get(i).getNumber("longitude");
+//
+//                        mMarkers.add(nMap.addMarker(new MarkerOptions()
+//                                .position(new LatLng(lat, lon))
+//                                .title(list.get(i).getString("fbId"))));
+//
+//
+//                    }
+//                }
+//
+//            }
+//        });
 
-                System.out.println("Size " + list.size());
+        ParseQuery<ParseObject> userObj = ParseQuery.getQuery("Location");
+        ParseQuery<ParseObject> locObj = ParseQuery.getQuery("User");
+        locObj.whereEqualTo("fbId", userObj);
 
-                for (int i = 0; i < list.size(); i++) {
+        locObj.findInBackground(new FindCallback<ParseObject>() {
+            public void done(List<ParseObject> locationList, ParseException e) {
+                // commentList now has the comments for myPost
 
-                    Double lat = Double.valueOf(list.get(i).getString("lat"));
-                    Double lon = Double.valueOf(list.get(i).getString("long"));
+//                System.out.println("Location Objek" + locationList.get(0).getString("name"));
 
-                    mMarkers.add(nMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(lat, lon))
-                            .title("Marker")));
-
-                }
+                e.printStackTrace();
 
             }
         });
+    }
 
+
+    private void isDataExists(final String userId, final Double lat, final Double lng) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Location");
+//        query.whereEqualTo("fbId", dataUser.get(0));
+        query.countInBackground(new CountCallback() {
+            @Override
+            public void done(int i, ParseException e) {
+
+                if (e == null) {
+
+                    boolean isExist = i > 0;
+                    saveData(isExist, userId, lat, lng);
+
+                }
+
+
+            }
+        });
+    }
+
+    private void saveData(boolean isExist, String userId, final Double lat, final Double lng) {
+
+        if (!isExist) {
+
+            ParseObject dataObj = new ParseObject("Location");
+//            dataObj.put("fbId", dataUser.get(0));
+            dataObj.put("latitude", lat);
+            dataObj.put("longitude", lng);
+            dataObj.saveInBackground();
+
+        } else {
+
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("Location");
+            query.whereEqualTo("fbId", userId);
+            query.getFirstInBackground(new GetCallback<ParseObject>() {
+                @Override
+                public void done(ParseObject parseObject, ParseException e) {
+
+                    parseObject.put("latitude", lat);
+                    parseObject.put("longitude", lng);
+                    parseObject.saveInBackground();
+
+                }
+            });
+
+
+            // If done let's draw marker
+//            drawMarker(gMap);
+        }
 
     }
 
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
-        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(mContext);
+        this.googleMap = googleMap;
 
-        locationProvider.getLastKnownLocation()
-                .subscribe(new Action1<Location>() {
-                    @Override
-                    public void call(Location location) {
+        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(getApplicationContext());
+        locationProvider.getLastKnownLocation().subscribe(new Action1<Location>() {
+            @Override
+            public void call(Location location) {
+                lat = location.getLatitude();
+                lng = location.getLongitude();
 
-
-                        lat = location.getLatitude();
-                        lng = location.getLongitude();
-
-                        // if location detected show marker
-                        setupMaps(googleMap, lat, lng);
-
-                    }
-                });
+                // if location detected show marker
+                setupMaps(lat, lng);
+            }
+        });
     }
 
 
-    private void setupMaps(GoogleMap googleMap, Double lat, Double lon){
-
-        googleMap.addMarker(new MarkerOptions()
-                .position(new LatLng(lat, lon))
-                .title("Marker"));
-
+    private void setupMaps(Double lat, Double lon) {
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 14));
 
         // Update current lat & lon to parse
-        updateLocation(lat, lon, googleMap);
+//        isDataExists(dataUser.get(0), lat, lon);
     }
 
 
@@ -146,7 +178,7 @@ public class HomeMapsActivity extends AppCompatActivity implements HomeMapsView,
 
         ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
 
-        query.getInBackground("OI9plXpAj3", new GetCallback<ParseObject>() {
+        query.getInBackground(userData.get(4), new GetCallback<ParseObject>() {
             @Override
             public void done(ParseObject parseObject, ParseException e) {
 
@@ -154,6 +186,7 @@ public class HomeMapsActivity extends AppCompatActivity implements HomeMapsView,
 
                     parseObject.put("lat", latitude);
                     parseObject.put("long", longitude);
+
                     parseObject.saveInBackground(new SaveCallback() {
                         @Override
                         public void done(ParseException e) {
@@ -180,12 +213,4 @@ public class HomeMapsActivity extends AppCompatActivity implements HomeMapsView,
             }
         });
     }
-
-    public boolean onKeyDown(int keycode, KeyEvent event){
-        if(keycode==KeyEvent.KEYCODE_BACK){
-            moveTaskToBack(true);
-        }
-        return super.onKeyDown(keycode,event);
-    }
-
 }

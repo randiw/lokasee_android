@@ -1,60 +1,76 @@
 package com.playing.lokasee.activites;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.CountDownTimer;
 
 import com.facebook.AccessToken;
-import com.facebook.AccessTokenTracker;
-import com.facebook.FacebookSdk;
 import com.playing.lokasee.R;
+import com.playing.lokasee.helper.UserData;
+
+import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
+import rx.functions.Action1;
 
 /**
  * Created by nabilla on 8/18/15.
  */
-public class SplashActivity extends Activity{
+public class SplashActivity extends BaseActivity {
 
-    private static int SPLASH_TIME = 2000;
+    private static final int SPLASH_TIME = 3000;
+    private static final int SPLASH_INTERVAL = 500;
+
+    private boolean isFinishCountDown;
+    private boolean isLocationRetrieved;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
+        setupLayout(R.layout.activity_splash);
 
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        updateWithToken(AccessToken.getCurrentAccessToken());
-
-        AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
+        new CountDownTimer(SPLASH_TIME, SPLASH_INTERVAL) {
             @Override
-            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken newAccessToken) {
-                updateWithToken(newAccessToken);
+            public void onTick(long millisUntilFinished) {
+
             }
-        };
+
+            @Override
+            public void onFinish() {
+                isFinishCountDown = true;
+                finishSplash();
+            }
+        }.start();
+
+        retrieveLocation();
     }
 
-    private void updateWithToken(AccessToken currentAccessToken){
-        if(currentAccessToken != null){
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //Intent i = new Intent(SplashActivity.this, HomeMapsActivity.class);
-                    Intent i = new Intent(SplashActivity.this, MainActivity.class);
-                    startActivity(i);
-                    finish();
+    private void retrieveLocation() {
+        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(getApplicationContext());
+        locationProvider.getLastKnownLocation().subscribe(new Action1<Location>() {
+            @Override
+            public void call(Location location) {
+                isLocationRetrieved = true;
+                if (location != null) {
+                    double lat = location.getLatitude();
+                    double lon = location.getLongitude();
+
+                    UserData.saveLocation(Double.toString(lat), Double.toString(lon));
                 }
-            }, SPLASH_TIME);
-        }else{
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    Intent i = new Intent(SplashActivity.this, LoginActivity.class);
-                    startActivity(i);
-                    finish();
-                }
-            }, SPLASH_TIME);
+            }
+        });
+    }
+
+    private void finishSplash() {
+        if (isFinishCountDown && isLocationRetrieved) {
+            Intent intent = null;
+            if (UserData.isLogin() && AccessToken.getCurrentAccessToken() != null) {
+                intent = new Intent(getApplicationContext(), MainActivity.class);
+            } else {
+                intent = new Intent(getApplicationContext(), LoginActivity.class);
+            }
+
+            startActivity(intent);
+            finish();
         }
     }
 }
