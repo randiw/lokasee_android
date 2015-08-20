@@ -5,40 +5,62 @@ package com.playing.lokasee.helper;
  */
 public class UserData {
 
-    public static final String ID_USER = "idUser";
-    public static final String NAME = "nameUser";
-    public static final String LAST_LAT = "lastLat";
-    public static final String LAST_LON = "lastLong";
-    public static final String OBJECT_ID = "objectId";
+    public static final String FACEBOOK_ID = "facebook_id";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String NAME = "name";
+    public static final String LATITUDE = "latitude";
+    public static final String LONGITUDE = "longitude";
+    public static final String PARSE_OBJECT_ID = "parse_object_id";
 
-    public static void saveFacebookLogin(String fbId, String name) {
-        DataHelper.saveData(ID_USER, fbId);
+    public static void saveFacebookLogin(String facebook_id, String name) {
+        DataHelper.saveData(FACEBOOK_ID, facebook_id);
         DataHelper.saveData(NAME, name);
     }
 
-    public static void saveParseResponse(String objectId) {
-        DataHelper.saveData(OBJECT_ID, objectId);
+    public static void saveParseCred(String username, String password) {
+        DataHelper.saveData(USERNAME, username);
+        DataHelper.saveData(PASSWORD, password);
     }
 
-    public static void saveLocation(String lat, String lon) {
-        DataHelper.saveData(LAST_LAT, lat);
-        DataHelper.saveData(LAST_LON, lon);
+    public static void saveParseResponse(String parse_object_id) {
+        DataHelper.saveData(PARSE_OBJECT_ID, parse_object_id);
     }
 
-    public static String getLastLat() {
-        String lat = DataHelper.getString(LAST_LAT);
+    public static void saveLocation(String latitude, String longitude) {
+        DataHelper.saveData(LATITUDE, latitude);
+        DataHelper.saveData(LONGITUDE, longitude);
+    }
+
+    public static String getUsername() {
+        String username = DataHelper.getString(USERNAME);
+        return username;
+    }
+
+    public static String getPassword() {
+        String password = DataHelper.getString(PASSWORD);
+        return password;
+    }
+
+    public static String getLatitude() {
+        String lat = DataHelper.getString(LATITUDE);
         return lat;
     }
 
-    public static String getLastLon() {
-        String lon = DataHelper.getString(LAST_LON);
+    public static String getLongitude() {
+        String lon = DataHelper.getString(LONGITUDE);
         return lon;
+    }
+
+    public static String getParseObjectId() {
+        String parseObjectId = DataHelper.getString(PARSE_OBJECT_ID);
+        return parseObjectId;
     }
 
     public static boolean isLogin() {
         boolean isLogin = false;
 
-        if(DataHelper.getString(ID_USER) != null) {
+        if(DataHelper.getString(FACEBOOK_ID) != null) {
             isLogin = true;
         }
 

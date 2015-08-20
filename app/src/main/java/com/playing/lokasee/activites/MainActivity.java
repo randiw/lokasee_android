@@ -32,8 +32,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
 
-        double lat = Double.parseDouble(UserData.getLastLat());
-        double lon = Double.parseDouble(UserData.getLastLon());
+        double lat = Double.parseDouble(UserData.getLatitude());
+        double lon = Double.parseDouble(UserData.getLongitude());
 
         setMyLocation(lat, lon);
     }

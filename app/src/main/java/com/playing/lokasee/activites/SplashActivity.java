@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 
 import com.facebook.AccessToken;
+import com.parse.ParseUser;
 import com.playing.lokasee.R;
+import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
@@ -55,6 +57,9 @@ public class SplashActivity extends BaseActivity {
                     double lon = location.getLongitude();
 
                     UserData.saveLocation(Double.toString(lat), Double.toString(lon));
+                    if (ParseUser.getCurrentUser() != null) {
+                        ParseHelper.getInstance().saveMyLocation(lat, lon, null);
+                    }
                 }
             }
         });
@@ -62,8 +67,8 @@ public class SplashActivity extends BaseActivity {
 
     private void finishSplash() {
         if (isFinishCountDown && isLocationRetrieved) {
-            Intent intent = null;
-            if (UserData.isLogin() && AccessToken.getCurrentAccessToken() != null) {
+            Intent intent;
+            if (ParseUser.getCurrentUser() != null && AccessToken.getCurrentAccessToken() != null) {
                 intent = new Intent(getApplicationContext(), MainActivity.class);
             } else {
                 intent = new Intent(getApplicationContext(), LoginActivity.class);

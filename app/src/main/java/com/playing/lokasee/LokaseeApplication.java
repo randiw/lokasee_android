@@ -1,6 +1,7 @@
 package com.playing.lokasee;
 
 import android.app.Application;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.facebook.FacebookSdk;
 import com.parse.Parse;
@@ -15,6 +16,8 @@ public class LokaseeApplication extends Application {
 
     private static LokaseeApplication instance;
 
+    private DaoSession daoSession;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -24,6 +27,8 @@ public class LokaseeApplication extends Application {
 
         FacebookSdk.sdkInitialize(getApplicationContext());
         setupParse();
+
+        setupDatabase();
     }
 
     public static synchronized LokaseeApplication getInstance() {
@@ -33,5 +38,16 @@ public class LokaseeApplication extends Application {
     private void setupParse() {
         Parse.enableLocalDatastore(this);
         Parse.initialize(this, getString(R.string.parse_app_id), getString(R.string.parse_client_id));
+    }
+
+    private void setupDatabase() {
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "lokasee-db", null);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(db);
+        daoSession = daoMaster.newSession();
+    }
+
+    public DaoSession getDaoSession() {
+        return daoSession;
     }
 }

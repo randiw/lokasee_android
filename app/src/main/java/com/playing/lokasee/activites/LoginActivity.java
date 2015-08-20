@@ -12,8 +12,9 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.parse.ParseException;
 import com.parse.ParseObject;
-import com.parse.SaveCallback;
+import com.parse.ParseUser;
 import com.playing.lokasee.R;
+import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 
 import butterknife.Bind;
@@ -43,7 +44,7 @@ public class LoginActivity extends BaseActivity {
                 Profile profile = Profile.getCurrentProfile();
                 if (profile != null) {
                     UserData.saveFacebookLogin(profile.getId(), profile.getName());
-                    saveData(profile);
+                    loginParse(profile);
                 }
             }
 
@@ -65,36 +66,43 @@ public class LoginActivity extends BaseActivity {
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void saveData(final Profile profile) {
-        final ParseObject userObject = new ParseObject("User");
-        userObject.put("fbId", profile.getId());
-        userObject.put("name", profile.getName());
-
-        userObject.saveInBackground(new SaveCallback() {
+    private void signUpParse(Profile profile) {
+        ParseHelper.getInstance().signUp(profile.getFirstName(), profile.getLastName(), profile.getName(), profile.getId(), new ParseHelper.OnLogParseListener() {
             @Override
-            public void done(ParseException e) {
-                if (e == null) {
-                    UserData.saveParseResponse(userObject.getObjectId());
+            public void onSuccess(ParseUser parseUser) {
+                updateLocation();
+            }
 
-                    ParseObject locationObject = new ParseObject("Location");
-                    locationObject.put("user", userObject);
-                    locationObject.put("latitude", UserData.getLastLat());
-                    locationObject.put("longitude", UserData.getLastLon());
-                    locationObject.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e == null) {
-                                Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                                startActivity(i);
-                                finish();
-                            } else {
-                                Log.e(TAG, "parseException: " + e.getMessage());
-                            }
-                        }
-                    });
-                } else {
-                    Log.e(TAG, "parseException: " + e.getMessage());
-                }
+            @Override
+            public void onError(ParseException pe) {
+
+            }
+        });
+    }
+
+    private void loginParse(final Profile profile) {
+        ParseHelper.getInstance().login(profile.getFirstName(), profile.getLastName(), profile.getId(), new ParseHelper.OnLogParseListener() {
+            @Override
+            public void onSuccess(ParseUser parseUser) {
+                updateLocation();
+            }
+
+            @Override
+            public void onError(ParseException pe) {
+                signUpParse(profile);
+            }
+        });
+    }
+
+    private void updateLocation() {
+        double latitude = Double.parseDouble(UserData.getLatitude());
+        double longitude = Double.parseDouble(UserData.getLongitude());
+
+        ParseHelper.getInstance().saveMyLocation(latitude, longitude, new ParseHelper.OnSaveParseObjectListener() {
+            @Override
+            public void onSaveParseObject(ParseObject parseObject) {
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                finish();
             }
         });
     }
