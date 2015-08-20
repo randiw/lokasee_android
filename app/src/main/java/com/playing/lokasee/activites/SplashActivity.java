@@ -64,7 +64,7 @@ public class SplashActivity extends BaseActivity {
         if (isFinishCountDown && isLocationRetrieved) {
             Intent intent = null;
             if (UserData.isLogin() && AccessToken.getCurrentAccessToken() != null) {
-                intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent = new Intent(getApplicationContext(), HomeMapsActivity.class);
             } else {
                 intent = new Intent(getApplicationContext(), LoginActivity.class);
             }

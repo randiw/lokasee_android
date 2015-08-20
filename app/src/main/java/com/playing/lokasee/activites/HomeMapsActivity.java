@@ -1,5 +1,6 @@
 package com.playing.lokasee.activites;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,20 +15,21 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.CountCallback;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
+import com.playing.lokasee.DaoMaster;
+import com.playing.lokasee.DaoSession;
 import com.playing.lokasee.R;
+import com.playing.lokasee.User;
+import com.playing.lokasee.UserDao;
 import com.playing.lokasee.helper.DataHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import de.greenrobot.daogenerator.DaoGenerator;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
-import rx.Subscription;
 import rx.functions.Action1;
 
 /**
@@ -42,6 +44,10 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
     private ArrayList<Marker> mMarkers;
     private String userId;
     private String objectId;
+    private DaoMaster daoMaster;
+    private DaoSession daoSession;
+    private UserDao userDao;
+    private SQLiteDatabase db;
 
 
     @Override
@@ -52,6 +58,7 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        initDb();
         initData();
     }
 
@@ -60,33 +67,67 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
         objectId = DataHelper.getString("objectId");
     }
 
-    private void configDb(){
+    private void initDb() {
 
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "lokasee-db", null);
+        db = helper.getWritableDatabase();
+        daoMaster = new DaoMaster(db);
+        daoSession = daoMaster.newSession();
+        userDao = daoSession.getUserDao();
+    }
+
+
+    private void insLocalDb(String name, Double lat, Double lon) {
+        User user = new User(null, objectId, userId, name, lat, lon);
+        userDao.insert(user);
 
     }
 
-    private void drawMarker(final GoogleMap nMap) {
+
+    private void getAllUsers() {
         mMarkers = new ArrayList<>();
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Location");
+        query.include("User");
         query.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
 
-                if (e == null) {
+                for (final ParseObject location : list) {
 
-                    for (int i = 0; i < list.size(); i++) {
+                    final ParseObject dataUser = location.getParseObject("user");
+                    dataUser.fetchIfNeededInBackground(new GetCallback<ParseObject>() {
+                        @Override
+                        public void done(ParseObject parseObject, ParseException e) {
 
-                        Double lat = (Double) list.get(i).getNumber("latitude");
-                        Double lon = (Double) list.get(i).getNumber("longitude");
+                            if (e == null) {
 
-                        mMarkers.add(nMap.addMarker(new MarkerOptions()
-                                .position(new LatLng(lat, lon))
-                                .title(list.get(i).getString("fbId"))));
-                    }
+                                String name = parseObject.getString("name");
+                                Double latitude = location.getDouble("latitude");
+                                Double longitude = location.getDouble("longitude");
+
+                                mMarkers.add(drawMaker(latitude, longitude, name));
+
+                                // Insert user to greenDb
+                                insLocalDb(name, latitude, longitude);
+
+                            } else {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    });
                 }
 
             }
         });
+    }
+
+    private Marker drawMaker(Double latitude, Double longitude, String name) {
+        LatLng position = new LatLng(latitude, longitude);
+
+        return googleMap.addMarker(new MarkerOptions()
+                .position(position)
+                .title(name));
     }
 
 
@@ -97,7 +138,7 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
             @Override
             public void done(int i, ParseException e) {
 
-                Log.i(getLocalClassName(), String.valueOf(i));
+                Log.i(TAG, String.valueOf(i));
 
                 if (e == null) {
 
@@ -109,10 +150,10 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
         });
     }
 
-    private void saveData(boolean isExist, String userId, final Double lat, final Double lng) {
+    private void saveData(boolean isExist, final String userId, final Double lat, final Double lng) {
 
         if (!isExist) {
-            ParseQuery<ParseObject> userQuery = new ParseQuery<ParseObject>("User");
+            ParseQuery<ParseObject> userQuery = new ParseQuery<>("User");
             userQuery.getInBackground(objectId, new GetCallback<ParseObject>() {
                 @Override
                 public void done(ParseObject parseObject, ParseException e) {
@@ -126,13 +167,11 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
                         @Override
                         public void done(ParseException e) {
                             // If done let's draw marker
-                            drawMarker(googleMap);
+                            getAllUsers();
                         }
                     });
                 }
             });
-
-
 
         } else {
 
@@ -148,7 +187,7 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
                         @Override
                         public void done(ParseException e) {
 
-                            drawMarker(googleMap);
+                            getAllUsers();
                         }
                     });
 
