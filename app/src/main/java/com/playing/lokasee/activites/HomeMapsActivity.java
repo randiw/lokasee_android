@@ -86,40 +86,23 @@ public class HomeMapsActivity extends BaseActivity implements HomeMapsView, OnMa
 
     private void drawMarker(final GoogleMap nMap) {
         mMarkers = new ArrayList<>();
-//        ParseQuery<ParseObject> query = ParseQuery.getQuery("Location");
-//        query.findInBackground(new FindCallback<ParseObject>() {
-//            @Override
-//            public void done(List<ParseObject> list, ParseException e) {
-//
-//                if (e == null) {
-//
-//                    for (int i = 0; i < list.size(); i++) {
-//
-//                        Double lat = (Double) list.get(i).getNumber("latitude");
-//                        Double lon = (Double) list.get(i).getNumber("longitude");
-//
-//                        mMarkers.add(nMap.addMarker(new MarkerOptions()
-//                                .position(new LatLng(lat, lon))
-//                                .title(list.get(i).getString("fbId"))));
-//
-//
-//                    }
-//                }
-//
-//            }
-//        });
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Location");
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
 
-        ParseQuery<ParseObject> userObj = ParseQuery.getQuery("Location");
-        ParseQuery<ParseObject> locObj = ParseQuery.getQuery("User");
-        locObj.whereEqualTo("fbId", userObj);
+                if (e == null) {
 
-        locObj.findInBackground(new FindCallback<ParseObject>() {
-            public void done(List<ParseObject> locationList, ParseException e) {
-                // commentList now has the comments for myPost
+                    for (int i = 0; i < list.size(); i++) {
 
-//                System.out.println("Location Objek" + locationList.get(0).getString("name"));
+                        Double lat = (Double) list.get(i).getNumber("latitude");
+                        Double lon = (Double) list.get(i).getNumber("longitude");
 
-                e.printStackTrace();
+                        mMarkers.add(nMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(lat, lon))
+                                .title(list.get(i).getString("fbId"))));
+                    }
+                }
 
             }
         });
@@ -133,6 +116,8 @@ public class HomeMapsActivity extends BaseActivity implements HomeMapsView, OnMa
         query.countInBackground(new CountCallback() {
             @Override
             public void done(int i, ParseException e) {
+
+                Log.i(getLocalClassName(), String.valueOf(i));
 
                 if (e == null) {
 
@@ -154,7 +139,13 @@ public class HomeMapsActivity extends BaseActivity implements HomeMapsView, OnMa
             dataObj.put("fbId", dataUser.get(0));
             dataObj.put("latitude", lat);
             dataObj.put("longitude", lng);
-            dataObj.saveInBackground();
+            dataObj.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    // If done let's draw marker
+                    drawMarker(gMap);
+                }
+            });
 
         }else{
 
@@ -166,14 +157,19 @@ public class HomeMapsActivity extends BaseActivity implements HomeMapsView, OnMa
 
                     parseObject.put("latitude", lat);
                     parseObject.put("longitude", lng);
-                    parseObject.saveInBackground();
+                    parseObject.saveInBackground(new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+
+                            drawMarker(gMap);
+                        }
+                    });
 
                 }
             });
 
 
-            // If done let's draw marker
-            drawMarker(gMap);
+
         }
 
     }
@@ -240,19 +236,19 @@ public class HomeMapsActivity extends BaseActivity implements HomeMapsView, OnMa
 
                             if (e == null) {
 
-                                Log.i(getLocalClassName(),"Successs");
+                                Log.i(getLocalClassName(), "Successs");
 
                                 drawMarker(googleMap);
 
 
-                            }else{
+                            } else {
 
                                 e.printStackTrace();
                             }
                         }
                     });
 
-                }else{
+                } else {
 
                     e.printStackTrace();
 

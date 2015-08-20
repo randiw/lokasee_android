@@ -30,4 +30,6 @@ dependencies {
     compile 'pl.charmas.android:android-reactive-location:0.7@aar'
     compile 'io.reactivex:rxjava:1.0.13'
     compile 'com.facebook.android:facebook-android-sdk:4.0.0'
+    compile 'de.greenrobot:greendao:2.0.0'
+    compile 'de.greenrobot:greendao-generator:2.0.0'
 }
