@@ -51,23 +51,15 @@ public class LoginActivity extends BaseActivity {
 
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Log.d(tag, "On Success");
 
                 Profile profile = Profile.getCurrentProfile();
                 if (profile != null && isLoginFb()) {
-                    String idFb = profile.getId().toString();
-                    String nama = profile.getName().toString();
-                    SetSharedPrefs(LoginActivity.this, idFb, nama, "", "");
-                    ArrayList<String> dataUser = new ArrayList<String>();
-                    dataUser = GetSharedPrefs(LoginActivity.this);
-                    Log.e(tag, "NAMA: " + dataUser.get(1).toString());
+
                     if (profile != null) {
 
-                        Log.d(tag, "On Success Profile");
-                        saveData(profile.getId().toString(), profile.getName().toString());
-
+                        // if login isSuccess save profile data to parse
+                        saveData(profile);
                     }
-
                 }
 
             }
@@ -86,23 +78,23 @@ public class LoginActivity extends BaseActivity {
     }
 
 
-    private void saveData(final String userId, final String userName) {
+    private void saveData(final Profile profile) {
 
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(mContext);
 
+        // Get location of use
         locationProvider.getLastKnownLocation()
                 .subscribe(new Action1<Location>() {
                     @Override
                     public void call(Location location) {
 
-                        // if location detected then save data to parse
-
                         String lat = String.valueOf(location.getLatitude());
                         String lon = String.valueOf(location.getLongitude());
 
-                        ParseObject testObject = new ParseObject("User");
-                        testObject.put("userId", userId);
-                        testObject.put("name", userName);
+                        // if location detected then save data to parse
+                        final ParseObject testObject = new ParseObject("User");
+                        testObject.put("fbId", profile.getId());
+                        testObject.put("name", profile.getName());
                         testObject.put("lat", lat);
                         testObject.put("long", lon);
 
@@ -110,7 +102,11 @@ public class LoginActivity extends BaseActivity {
                             @Override
                             public void done(ParseException e) {
 
+                                // if saving data to parse success then
+                                // set data to pref and intent to maps
                                 if (e == null) {
+
+                                    SetSharedPrefs(LoginActivity.this, testObject.getObjectId() , profile.getId(), profile.getName(), "", "");
 
                                     Intent i = new Intent(getApplicationContext(), HomeMapsActivity.class);
                                     startActivity(i);
