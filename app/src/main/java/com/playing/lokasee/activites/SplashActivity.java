@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 
 import com.facebook.AccessToken;
+import com.facebook.FacebookSdk;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -73,6 +74,8 @@ public class SplashActivity extends BaseActivity {
                         });
                     }
                 }
+
+                finishSplash();
             }
         });
     }
