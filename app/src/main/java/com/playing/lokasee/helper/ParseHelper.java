@@ -35,6 +35,7 @@ public class ParseHelper {
     }
 
     private ParseUser currentUser;
+    private ParseObject userLocation;
 
     public void signUp(String firstName, String lastName, String name, final String facebookId, final OnLogParseListener onLogParseListener) {
         final String username = firstName.toLowerCase() + "." + lastName.toLowerCase();
@@ -110,29 +111,70 @@ public class ParseHelper {
         });
     }
 
+    public void retrieveMyLocation(String facebookId, final OnParseQueryListener onParseQueryListener) {
+        Log.d(TAG, "retrieveMyLocation");
+
+        ParseQuery<ParseObject> locationQuery = new ParseQuery<ParseObject>(LOCATION);
+        locationQuery.whereEqualTo(UserDao.Properties.Facebook_id.name, facebookId);
+        locationQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
+                if(e == null) {
+                    if(list.size() > 0) {
+                        ParseObject locationObject = list.get(0);
+                        userLocation = locationObject;
+                        onParseQueryListener.onParseQuery(list);
+                    } else {
+                        onParseQueryListener.onError(new ParseException(new Throwable("empty list")));
+                    }
+
+                } else {
+                    Log.e(TAG, "retrieve my location parseException " + e.getMessage());
+                    onParseQueryListener.onError(e);
+                }
+            }
+        });
+    }
+
     public void saveMyLocation(final double latitude, final double longitude, final OnSaveParseObjectListener onSaveParseObjectListener) {
+        Log.d(TAG, "saveMyLocation");
         if(currentUser == null) {
             currentUser = ParseUser.getCurrentUser();
         }
 
-        final ParseObject locationObject = new ParseObject(LOCATION);
-        locationObject.put(UserDao.TABLENAME.toLowerCase(), currentUser);
-        locationObject.put(UserDao.Properties.Name.name, currentUser.get(UserDao.Properties.Name.name));
-        locationObject.put(UserDao.Properties.Facebook_id.name, currentUser.get(UserDao.Properties.Facebook_id.name));
-        locationObject.put(UserDao.Properties.Latitude.name, latitude);
-        locationObject.put(UserDao.Properties.Longitude.name, longitude);
-
-        locationObject.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e == null) {
-                    onSaveParseObjectListener.onSaveParseObject(locationObject);
-                } else {
-                    Log.e(TAG, "save location parseException: " + e.getMessage());
-                    onSaveParseObjectListener.onError(e);
+        if(userLocation == null) {
+            Log.d(TAG, "userLocation null");
+            retrieveMyLocation(UserData.getFacebookId(), new OnParseQueryListener() {
+                @Override
+                public void onParseQuery(List<ParseObject> parseObjectList) {
+                    saveMyLocation(latitude, longitude, onSaveParseObjectListener);
                 }
-            }
-        });
+
+                @Override
+                public void onError(ParseException pe) {
+                    userLocation = new ParseObject(LOCATION);
+                    saveMyLocation(latitude, longitude, onSaveParseObjectListener);
+                }
+            });
+        } else {
+            userLocation.put(UserDao.TABLENAME.toLowerCase(), currentUser);
+            userLocation.put(UserDao.Properties.Name.name, currentUser.get(UserDao.Properties.Name.name));
+            userLocation.put(UserDao.Properties.Facebook_id.name, currentUser.get(UserDao.Properties.Facebook_id.name));
+            userLocation.put(UserDao.Properties.Latitude.name, latitude);
+            userLocation.put(UserDao.Properties.Longitude.name, longitude);
+
+            userLocation.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (e == null) {
+                        onSaveParseObjectListener.onSaveParseObject(userLocation);
+                    } else {
+                        Log.e(TAG, "save location parseException: " + e.getMessage());
+                        onSaveParseObjectListener.onError(e);
+                    }
+                }
+            });
+        }
     }
 
     public abstract interface OnParseListener {

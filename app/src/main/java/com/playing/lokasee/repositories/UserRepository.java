@@ -43,7 +43,7 @@ public class UserRepository {
 
     public static List<User> getAll() {
         List<User> users = getUserDao().queryBuilder().list();
-        if(RepoTools.isRowAvailable(users)) {
+        if(!RepoTools.isRowAvailable(users)) {
             return null;
         }
 
