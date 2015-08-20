@@ -76,6 +76,8 @@ public class SplashActivity extends BaseActivity {
                         });
                     }
                 }
+
+                finishSplash();
             }
         });
     }
