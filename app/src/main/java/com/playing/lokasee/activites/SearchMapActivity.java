@@ -38,7 +38,7 @@ public class SearchMapActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_maps);
 
-        setActionBar("LokaSee - Search");
+//        setActionBar("LokaSee - Search");
 
         ButterKnife.bind(this);
         Intent i = getIntent();

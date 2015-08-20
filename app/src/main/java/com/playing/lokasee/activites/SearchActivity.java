@@ -41,7 +41,7 @@ public class SearchActivity extends BaseActivity {
         super.onCreate(saveInstanceState);
         setContentView(R.layout.activity_search);
 
-        setActionBar("LokaSee - Search");
+//        setActionBar("LokaSee - Search");
 
         ButterKnife.bind(this);
         ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
