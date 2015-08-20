@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 
 import com.facebook.AccessToken;
+import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.playing.lokasee.R;
 import com.playing.lokasee.helper.ParseHelper;
@@ -58,7 +60,17 @@ public class SplashActivity extends BaseActivity {
 
                     UserData.saveLocation(Double.toString(lat), Double.toString(lon));
                     if (ParseUser.getCurrentUser() != null) {
-                        ParseHelper.getInstance().saveMyLocation(lat, lon, null);
+                        ParseHelper.getInstance().saveMyLocation(lat, lon, new ParseHelper.OnSaveParseObjectListener() {
+                            @Override
+                            public void onSaveParseObject(ParseObject parseObject) {
+
+                            }
+
+                            @Override
+                            public void onError(ParseException pe) {
+
+                            }
+                        });
                     }
                 }
             }

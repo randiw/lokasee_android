@@ -104,6 +104,11 @@ public class LoginActivity extends BaseActivity {
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 finish();
             }
+
+            @Override
+            public void onError(ParseException pe) {
+
+            }
         });
     }
 }

@@ -111,6 +111,10 @@ public class ParseHelper {
     }
 
     public void saveMyLocation(final double latitude, final double longitude, final OnSaveParseObjectListener onSaveParseObjectListener) {
+        if(currentUser == null) {
+            currentUser = ParseUser.getCurrentUser();
+        }
+
         final ParseObject locationObject = new ParseObject(LOCATION);
         locationObject.put(UserDao.TABLENAME.toLowerCase(), currentUser);
         locationObject.put(UserDao.Properties.Name.name, currentUser.get(UserDao.Properties.Name.name));
