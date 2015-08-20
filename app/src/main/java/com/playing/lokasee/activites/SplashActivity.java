@@ -15,7 +15,7 @@ import com.playing.lokasee.R;
 /**
  * Created by nabilla on 8/18/15.
  */
-public class SplashActivity extends BaseActivity{
+public class SplashActivity extends Activity{
 
     private static int SPLASH_TIME = 2000;
 
@@ -41,7 +41,7 @@ public class SplashActivity extends BaseActivity{
                 @Override
                 public void run() {
                     //Intent i = new Intent(SplashActivity.this, HomeMapsActivity.class);
-                    Intent i = new Intent(SplashActivity.this, HomeMapsActivity.class);
+                    Intent i = new Intent(SplashActivity.this, MainActivity.class);
                     startActivity(i);
                     finish();
                 }

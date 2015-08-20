@@ -51,7 +51,12 @@
 
         <activity android:name=".activites.LoginActivity"/>
         <activity android:name=".activites.MainActivity"/>
-        <activity android:name=".activites.HomeMapsActivity"/>
+        <activity android:name=".activites.HomeMapsActivity"
+            android:parentActivityName=".activites.MainActivity"/>
+        <activity android:name=".activites.SearchActivity"
+            android:parentActivityName=".activites.MainActivity"/>
+        <activity android:name=".activites.SearchMapActivity"
+            android:parentActivityName=".activites.SearchActivity"/>
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
 
     </application>

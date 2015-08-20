@@ -1,9 +1,13 @@
 package com.playing.lokasee.activites;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.facebook.AccessToken;
 import com.playing.lokasee.R;
@@ -13,7 +17,7 @@ import java.util.ArrayList;
 /**
  * Created by nabilla on 8/19/15.
  */
-public class BaseActivity extends Activity {
+public class BaseActivity extends AppCompatActivity {
 
     private static final String IdUser = "idUser";
     private static final String Name = "nameUser";
@@ -57,5 +61,20 @@ public class BaseActivity extends Activity {
         else{
             return false;
         }
+    }
+
+    protected void setActionBar(String title){
+        getSupportActionBar().setTitle(title);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        return super.onOptionsItemSelected(item);
     }
 }

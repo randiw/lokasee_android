@@ -107,7 +107,7 @@ public class LoginActivity extends BaseActivity {
 
                                 if (e == null) {
 
-                                    Intent i = new Intent(getApplicationContext(), HomeMapsActivity.class);
+                                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
                                     startActivity(i);
                                     finish();
 
@@ -126,6 +126,6 @@ public class LoginActivity extends BaseActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
-        loginButton.setVisibility(View.GONE);
+        //loginButton.setVisibility(View.GONE);
     }
 }
