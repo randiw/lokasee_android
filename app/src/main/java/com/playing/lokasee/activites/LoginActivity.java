@@ -69,8 +69,6 @@ public class LoginActivity extends BaseActivity {
         final ParseObject userObject = new ParseObject("User");
         userObject.put("fbId", profile.getId());
         userObject.put("name", profile.getName());
-        userObject.put("lat", UserData.getLastLat());
-        userObject.put("long", UserData.getLastLon());
 
         userObject.saveInBackground(new SaveCallback() {
             @Override
@@ -78,9 +76,22 @@ public class LoginActivity extends BaseActivity {
                 if (e == null) {
                     UserData.saveParseResponse(userObject.getObjectId());
 
-                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(i);
-                    finish();
+                    ParseObject locationObject = new ParseObject("Location");
+                    locationObject.put("user", userObject);
+                    locationObject.put("latitude", UserData.getLastLat());
+                    locationObject.put("longitude", UserData.getLastLon());
+                    locationObject.saveInBackground(new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (e == null) {
+                                Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                                startActivity(i);
+                                finish();
+                            } else {
+                                Log.e(TAG, "parseException: " + e.getMessage());
+                            }
+                        }
+                    });
                 } else {
                     Log.e(TAG, "parseException: " + e.getMessage());
                 }
