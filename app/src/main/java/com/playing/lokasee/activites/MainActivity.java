@@ -1,6 +1,7 @@
 package com.playing.lokasee.activites;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,8 +37,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        retrieveMarkers();
     }
 
     @Override
@@ -48,6 +47,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         double lon = Double.parseDouble(UserData.getLongitude());
 
         setMyLocation(lat, lon);
+        retrieveMarkers();
     }
 
     private void setMyLocation(double latitude, double longitude) {
