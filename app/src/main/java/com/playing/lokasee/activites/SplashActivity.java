@@ -1,42 +1,76 @@
 package com.playing.lokasee.activites;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.CountDownTimer;
 
-import com.facebook.FacebookSdk;
+import com.facebook.AccessToken;
 import com.playing.lokasee.R;
+import com.playing.lokasee.helper.UserData;
+
+import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
+import rx.functions.Action1;
 
 /**
  * Created by nabilla on 8/18/15.
  */
-public class SplashActivity extends BaseActivity{
+public class SplashActivity extends BaseActivity {
 
-    private static int SPLASH_TIME = 2000;
+    private static final int SPLASH_TIME = 3000;
+    private static final int SPLASH_INTERVAL = 500;
+
+    private boolean isFinishCountDown;
+    private boolean isLocationRetrieved;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
+        setupLayout(R.layout.activity_splash);
 
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        new Handler().postDelayed(new Runnable() {
+        new CountDownTimer(SPLASH_TIME, SPLASH_INTERVAL) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
 
             @Override
-            public void run() {
-
-                if(isLogin(getApplicationContext())&& isLoginFb()) {
-                    Intent i = new Intent(getApplicationContext(), HomeMapsActivity.class);
-                    startActivity(i);
-                }else{
-                    Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-                    startActivity(i);
-                }
-
-                finish();
+            public void onFinish() {
+                isFinishCountDown = true;
+                finishSplash();
             }
-        }, SPLASH_TIME);
+        }.start();
+
+        retrieveLocation();
+    }
+
+    private void retrieveLocation() {
+        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(getApplicationContext());
+        locationProvider.getLastKnownLocation().subscribe(new Action1<Location>() {
+            @Override
+            public void call(Location location) {
+                isLocationRetrieved = true;
+                if (location != null) {
+                    double lat = location.getLatitude();
+                    double lon = location.getLongitude();
+
+                    UserData.saveLocation(Double.toString(lat), Double.toString(lon));
+                }
+            }
+        });
+    }
+
+    private void finishSplash() {
+        if (isFinishCountDown && isLocationRetrieved) {
+            Intent intent = null;
+            if (UserData.isLogin() && AccessToken.getCurrentAccessToken() != null) {
+                intent = new Intent(getApplicationContext(), HomeMapsActivity.class);
+            } else {
+                intent = new Intent(getApplicationContext(), LoginActivity.class);
+            }
+
+            startActivity(intent);
+            finish();
+        }
     }
 }
