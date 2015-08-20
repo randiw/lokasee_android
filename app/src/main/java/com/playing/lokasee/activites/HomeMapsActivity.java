@@ -10,24 +10,22 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.CountCallback;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 import com.playing.lokasee.R;
-<<<<<<< HEAD
 import com.playing.lokasee.helper.DataHelper;
-import com.playing.lokasee.helper.UserData;
-import com.playing.lokasee.model.User;
-=======
->>>>>>> f8ff7e1e15449ebf2e4ae8f5a5001e2b06265d57
 
 import java.util.ArrayList;
 import java.util.List;
 
+import de.greenrobot.daogenerator.DaoGenerator;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Subscription;
 import rx.functions.Action1;
@@ -40,18 +38,11 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
     private static final String TAG = HomeMapsActivity.class.getSimpleName();
 
     private GoogleMap googleMap;
-
-    private Subscription subCript;
     private Double lat, lng;
     private ArrayList<Marker> mMarkers;
-<<<<<<< HEAD
-    private GoogleMap gMap;
     private String userId;
     private String objectId;
-=======
-    private ArrayList<String> userData;
-    int num;
->>>>>>> f8ff7e1e15449ebf2e4ae8f5a5001e2b06265d57
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,21 +51,20 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        initData();
     }
 
-<<<<<<< HEAD
-    @Override
-    public void mapsSetup() {
-
-    }
-
-    private void initData(){
+    private void initData() {
         userId = DataHelper.getString("userId");
         objectId = DataHelper.getString("objectId");
     }
 
-=======
->>>>>>> f8ff7e1e15449ebf2e4ae8f5a5001e2b06265d57
+    private void configDb(){
+
+
+    }
+
     private void drawMarker(final GoogleMap nMap) {
         mMarkers = new ArrayList<>();
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Location");
@@ -102,11 +92,7 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
 
     private void isDataExists(final String userId, final Double lat, final Double lng) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Location");
-<<<<<<< HEAD
         query.whereEqualTo("fbId", userId);
-=======
-//        query.whereEqualTo("fbId", dataUser.get(0));
->>>>>>> f8ff7e1e15449ebf2e4ae8f5a5001e2b06265d57
         query.countInBackground(new CountCallback() {
             @Override
             public void done(int i, ParseException e) {
@@ -126,23 +112,27 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
     private void saveData(boolean isExist, String userId, final Double lat, final Double lng) {
 
         if (!isExist) {
-
-            ParseObject dataObj = new ParseObject("Location");
-<<<<<<< HEAD
-            dataObj.put("fbId", userId);
-=======
-//            dataObj.put("fbId", dataUser.get(0));
->>>>>>> f8ff7e1e15449ebf2e4ae8f5a5001e2b06265d57
-            dataObj.put("latitude", lat);
-            dataObj.put("longitude", lng);
-            dataObj.saveInBackground(new SaveCallback() {
+            ParseQuery<ParseObject> userQuery = new ParseQuery<ParseObject>("User");
+            userQuery.getInBackground(objectId, new GetCallback<ParseObject>() {
                 @Override
-                public void done(ParseException e) {
+                public void done(ParseObject parseObject, ParseException e) {
+                    ParseObject dataObj = new ParseObject("Location");
 
-                    // If done let's draw marker
-                    drawMarker(gMap);
+                    dataObj.put("fbId", userId);
+                    dataObj.put("latitude", lat);
+                    dataObj.put("longitude", lng);
+                    dataObj.put("userRelational", parseObject);
+                    dataObj.saveInBackground(new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            // If done let's draw marker
+                            drawMarker(googleMap);
+                        }
+                    });
                 }
             });
+
+
 
         } else {
 
@@ -158,20 +148,12 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
                         @Override
                         public void done(ParseException e) {
 
-                            drawMarker(gMap);
+                            drawMarker(googleMap);
                         }
                     });
 
                 }
             });
-
-
-<<<<<<< HEAD
-
-=======
-            // If done let's draw marker
-//            drawMarker(gMap);
->>>>>>> f8ff7e1e15449ebf2e4ae8f5a5001e2b06265d57
         }
 
     }
@@ -199,103 +181,8 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lon), 14));
 
         // Update current lat & lon to parse
-<<<<<<< HEAD
         isDataExists(userId, lat, lon);
     }
-
-
-//    private void updateLocation(final Double lat, final Double lon, final GoogleMap googleMap) {
-//
-//        final String latitude = lat.toString();
-//        final String longitude = lon.toString();
-//
-//
-//        ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
-//
-//        query.getInBackground(userData.get(4), new GetCallback<ParseObject>() {
-//            @Override
-//            public void done(ParseObject parseObject, ParseException e) {
-//
-//                if (e == null) {
-//
-//                    parseObject.put("lat", latitude);
-//                    parseObject.put("long", longitude);
-//
-//                    parseObject.saveInBackground(new SaveCallback() {
-//                        @Override
-//                        public void done(ParseException e) {
-//
-//                            if (e == null) {
-//
-//                                Log.i(getLocalClassName(), "Successs");
-//
-//                                drawMarker(googleMap);
-//
-//
-//                            } else {
-//
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                    });
-//
-//                } else {
-//
-//                    e.printStackTrace();
-//
-//                }
-//            }
-//        });
-//    }
-
 }
-=======
-//        isDataExists(dataUser.get(0), lat, lon);
-    }
 
 
-    private void updateLocation(final Double lat, final Double lon, final GoogleMap googleMap) {
-
-        final String latitude = lat.toString();
-        final String longitude = lon.toString();
-
-
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
-
-        query.getInBackground(userData.get(4), new GetCallback<ParseObject>() {
-            @Override
-            public void done(ParseObject parseObject, ParseException e) {
-
-                if (e == null) {
-
-                    parseObject.put("lat", latitude);
-                    parseObject.put("long", longitude);
-
-                    parseObject.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-
-                            if (e == null) {
-
-                                Log.i(getLocalClassName(), "Successs");
-
-                                drawMarker(googleMap);
-
-
-                            } else {
-
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-
-                } else {
-
-                    e.printStackTrace();
-
-                }
-            }
-        });
-    }
-}
->>>>>>> f8ff7e1e15449ebf2e4ae8f5a5001e2b06265d57
