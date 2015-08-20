@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by randi on 8/20/15.
  */
-public class UserRepositories {
+public class UserRepository {
 
     public static void save(User user) {
         User oldUser = find(user.getObject_id());
