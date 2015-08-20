@@ -22,6 +22,8 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 import com.playing.lokasee.R;
+import com.playing.lokasee.helper.DataHelper;
+import com.playing.lokasee.helper.UserData;
 import com.playing.lokasee.model.User;
 
 import java.util.ArrayList;
@@ -45,9 +47,8 @@ public class HomeMapsActivity extends BaseActivity implements HomeMapsView, OnMa
     private Double lat, lng;
     private ArrayList<Marker> mMarkers;
     private GoogleMap gMap;
-    private ArrayList<String> userData;
-    int num;
-
+    private String userId;
+    private String objectId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +82,8 @@ public class HomeMapsActivity extends BaseActivity implements HomeMapsView, OnMa
     }
 
     private void initData(){
-        userData = GetSharedPrefs(mContext);
+        userId = DataHelper.getString("userId");
+        objectId = DataHelper.getString("objectId");
     }
 
     private void drawMarker(final GoogleMap nMap) {
@@ -112,7 +114,7 @@ public class HomeMapsActivity extends BaseActivity implements HomeMapsView, OnMa
 
     private void isDataExists(final String userId, final Double lat, final Double lng){
         ParseQuery<ParseObject> query = ParseQuery.getQuery("Location");
-        query.whereEqualTo("fbId", dataUser.get(0));
+        query.whereEqualTo("fbId", userId);
         query.countInBackground(new CountCallback() {
             @Override
             public void done(int i, ParseException e) {
@@ -125,8 +127,6 @@ public class HomeMapsActivity extends BaseActivity implements HomeMapsView, OnMa
                     saveData(isExist, userId, lat, lng);
 
                 }
-
-
             }
         });
     }
@@ -136,12 +136,13 @@ public class HomeMapsActivity extends BaseActivity implements HomeMapsView, OnMa
         if(!isExist){
 
             ParseObject dataObj = new ParseObject("Location");
-            dataObj.put("fbId", dataUser.get(0));
+            dataObj.put("fbId", userId);
             dataObj.put("latitude", lat);
             dataObj.put("longitude", lng);
             dataObj.saveInBackground(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
+
                     // If done let's draw marker
                     drawMarker(gMap);
                 }
@@ -209,52 +210,52 @@ public class HomeMapsActivity extends BaseActivity implements HomeMapsView, OnMa
         gMap = googleMap;
 
         // Update current lat & lon to parse
-        isDataExists(dataUser.get(0), lat, lon);
+        isDataExists(userId, lat, lon);
     }
 
 
-    private void updateLocation(final Double lat, final Double lon, final GoogleMap googleMap) {
-
-        final String latitude = lat.toString();
-        final String longitude = lon.toString();
-
-
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
-
-        query.getInBackground(userData.get(4), new GetCallback<ParseObject>() {
-            @Override
-            public void done(ParseObject parseObject, ParseException e) {
-
-                if (e == null) {
-
-                    parseObject.put("lat", latitude);
-                    parseObject.put("long", longitude);
-
-                    parseObject.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-
-                            if (e == null) {
-
-                                Log.i(getLocalClassName(), "Successs");
-
-                                drawMarker(googleMap);
-
-
-                            } else {
-
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-
-                } else {
-
-                    e.printStackTrace();
-
-                }
-            }
-        });
-    }
+//    private void updateLocation(final Double lat, final Double lon, final GoogleMap googleMap) {
+//
+//        final String latitude = lat.toString();
+//        final String longitude = lon.toString();
+//
+//
+//        ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
+//
+//        query.getInBackground(userData.get(4), new GetCallback<ParseObject>() {
+//            @Override
+//            public void done(ParseObject parseObject, ParseException e) {
+//
+//                if (e == null) {
+//
+//                    parseObject.put("lat", latitude);
+//                    parseObject.put("long", longitude);
+//
+//                    parseObject.saveInBackground(new SaveCallback() {
+//                        @Override
+//                        public void done(ParseException e) {
+//
+//                            if (e == null) {
+//
+//                                Log.i(getLocalClassName(), "Successs");
+//
+//                                drawMarker(googleMap);
+//
+//
+//                            } else {
+//
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                    });
+//
+//                } else {
+//
+//                    e.printStackTrace();
+//
+//                }
+//            }
+//        });
+//    }
 
 }
