@@ -78,7 +78,7 @@ public class LoginActivity extends BaseActivity {
                 if (e == null) {
                     UserData.saveParseResponse(userObject.getObjectId());
 
-                    Intent i = new Intent(getApplicationContext(), HomeMapsActivity.class);
+                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(i);
                     finish();
                 } else {
