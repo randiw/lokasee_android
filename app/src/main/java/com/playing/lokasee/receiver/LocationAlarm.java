@@ -12,8 +12,10 @@ import android.util.Log;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.playing.lokasee.R;
+import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
+import com.squareup.otto.Produce;
 
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.functions.Action1;
@@ -24,6 +26,7 @@ import rx.functions.Action1;
 public class LocationAlarm extends BroadcastReceiver {
 
     private static final String TAG = LocationAlarm.class.getSimpleName();
+
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -58,15 +61,26 @@ public class LocationAlarm extends BroadcastReceiver {
 
                 if (location != null) {
 
+                    UserData.saveLocation(Double.toString(location.getLatitude()), Double.toString(location.getLongitude()));
+
                     updateLocation(location.getLatitude(), location.getLongitude());
+
+                    BusProvider.getInstance().post(produceLocation(location));
+
                     //tell listener of location update listener.onLocationUpdate(location)
                 } else {
+
                     Log.e(TAG, mContext.getString(R.string.error_message_location));
 
                 }
             }
         });
     }
+
+    @Produce public Location produceLocation(Location location){
+        return location;
+    }
+
 
     private void updateLocation(Double lat, Double lon) {
 
@@ -83,4 +97,7 @@ public class LocationAlarm extends BroadcastReceiver {
         });
 
     }
+
+
+
 }
