@@ -2,6 +2,7 @@ package com.playing.lokasee.activites;
 
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -22,6 +23,7 @@ import com.parse.ParseObject;
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
 import com.playing.lokasee.helper.BusProvider;
+import com.playing.lokasee.helper.DataHelper;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 import com.playing.lokasee.models.EventBusLocation;
@@ -131,12 +133,11 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         lat = Double.parseDouble(UserData.getLatitude());
         lon = Double.parseDouble(UserData.getLongitude());
 
-        setMyLocation(lat, lon);
+        setMyLocation(lat, lon, DataHelper.getString("name"));
         retrieveMarkers();
     }
 
-    private void setMyLocation(double latitude, double longitude) {
-        Log.i(TAG, "Calll");
+    private void setMyLocation(double latitude, double longitude, String name) {
         if (googleMap != null) {
             LatLng position = new LatLng(latitude, longitude);
             float zoom = 14.0f;
@@ -144,7 +145,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
             if (myMarker == null) {
                 myMarker = googleMap.addMarker(new MarkerOptions()
                         .position(position)
-                        .title("I am here"));
+                        .title(name));
             } else {
                 myMarker.setPosition(position);
             }
@@ -203,7 +204,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
                 if (googleMap != null && markers != null) {
                     Log.i(TAG, "Clear Map");
                     retrieveMarkers();
-                    setMyLocation(eventBusLocation.getLocation().getLatitude(),eventBusLocation.getLocation().getLongitude());
+                    setMyLocation(eventBusLocation.getLocation().getLatitude(),eventBusLocation.getLocation().getLongitude(), DataHelper.getString("name"));
 
                 }
             }

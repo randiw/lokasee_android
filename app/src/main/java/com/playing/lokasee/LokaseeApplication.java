@@ -16,13 +16,9 @@ import com.playing.lokasee.helper.DataHelper;
  */
 public class LokaseeApplication extends Application {
 
-    public static final String TAG = LokaseeApplication.class.getSimpleName();
-
     private static LokaseeApplication instance;
 
     private DaoSession daoSession;
-
-    private boolean inForegound;
 
     @Override
     public void onCreate() {
@@ -58,8 +54,5 @@ public class LokaseeApplication extends Application {
         return daoSession;
     }
 
-    public boolean isInForegound(){
-        return inForegound;
-    }
 
 }
