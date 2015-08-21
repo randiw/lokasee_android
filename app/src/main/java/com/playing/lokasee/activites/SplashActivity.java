@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -24,7 +25,7 @@ public class SplashActivity extends BaseActivity {
 
     private static final int SPLASH_TIME = 3000;
     private static final int SPLASH_INTERVAL = 500;
-
+    private static final String tag = SplashActivity.class.getSimpleName();
     private boolean isFinishCountDown;
     private boolean isLocationRetrieved;
 
@@ -56,6 +57,7 @@ public class SplashActivity extends BaseActivity {
         locationProvider.getLastKnownLocation().subscribe(new Action1<Location>() {
             @Override
             public void call(Location location) {
+                Log.d(tag, "location response");
                 isLocationRetrieved = true;
                 if (location != null) {
                     double lat = location.getLatitude();
@@ -79,11 +81,17 @@ public class SplashActivity extends BaseActivity {
 
                 finishSplash();
             }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                Log.d(tag, "throwable " + throwable.getMessage());
+                finishSplash();
+            }
         });
     }
 
     private void finishSplash() {
-        if (isFinishCountDown && isLocationRetrieved) {
+        if (isFinishCountDown || isLocationRetrieved) {
             Intent intent;
             if (ParseUser.getCurrentUser() != null && AccessToken.getCurrentAccessToken() != null) {
                 intent = new Intent(getApplicationContext(), MainActivity.class);

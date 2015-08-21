@@ -1,7 +1,10 @@
 package com.playing.lokasee.activites;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -22,10 +25,14 @@ import com.playing.lokasee.repositories.UserRepository;
 import java.util.Hashtable;
 import java.util.List;
 
+import butterknife.Bind;
+
 public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    @Bind(R.id.search)
+    Button searchButton;
     private GoogleMap googleMap;
     private Marker myMarker;
     private Hashtable<String, Marker> markers;
@@ -37,6 +44,14 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(), SearchActivity.class);
+                startActivity(i);
+            }
+        });
     }
 
     @Override

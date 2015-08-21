@@ -53,4 +53,5 @@ public class UserRepository {
     private static UserDao getUserDao() {
         return LokaseeApplication.getInstance().getDaoSession().getUserDao();
     }
+
 }

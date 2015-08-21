@@ -16,6 +16,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.playing.lokasee.R;
+import com.playing.lokasee.User;
+import com.playing.lokasee.repositories.UserRepository;
 import com.playing.lokasee.util.UtilStatic;
 
 import java.security.interfaces.DSAPublicKey;
@@ -31,7 +33,9 @@ public class SearchMapActivity extends BaseActivity {
     @Bind(R.id.username)
     TextView username;
     private GoogleMap googleMap;
-    int pos;
+    String objId;
+
+    User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +46,10 @@ public class SearchMapActivity extends BaseActivity {
 
         ButterKnife.bind(this);
         Intent i = getIntent();
-        pos = i.getIntExtra("pos", 0);
-        username.setText(UtilStatic.users.get(pos).getName());
+        objId = i.getStringExtra("objId");
+        user = UserRepository.find(objId);
+        username.setText(user.getName().toString());
+
         initializeMap();
     }
 
@@ -55,9 +61,9 @@ public class SearchMapActivity extends BaseActivity {
                 Toast.makeText(getApplicationContext(), "Sorry! unable create maps", Toast.LENGTH_SHORT).show();
             }
         }else {
-            LatLng user = new LatLng(UtilStatic.users.get(pos).getLat(),UtilStatic.users.get(pos).getLng());
-            MarkerOptions marker = new MarkerOptions().position(user).title(UtilStatic.users.get(pos).getName());
-            CameraPosition cameraPosition = new CameraPosition.Builder().target(user).zoom(12).build();
+            LatLng userPos = new LatLng(user.getLatitude(),user.getLongitude());
+            MarkerOptions marker = new MarkerOptions().position(userPos).title(user.getName());
+            CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
             googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
             googleMap.addMarker(marker);
