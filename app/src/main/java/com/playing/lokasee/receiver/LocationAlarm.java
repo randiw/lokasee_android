@@ -15,6 +15,7 @@ import com.playing.lokasee.R;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
+import com.playing.lokasee.models.EventBusLocation;
 import com.squareup.otto.Produce;
 
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
@@ -28,12 +29,17 @@ public class LocationAlarm extends BroadcastReceiver {
     private static final String TAG = LocationAlarm.class.getSimpleName();
 
 
+
+
+
     @Override
     public void onReceive(Context context, Intent intent) {
         detectLocation(context);
     }
 
     public void setAlarm(Context context, long durationTime) {
+
+        BusProvider.getInstance().register(context);
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
@@ -45,6 +51,8 @@ public class LocationAlarm extends BroadcastReceiver {
     }
 
     public void cancelAlarm(Context mContext){
+
+        BusProvider.getInstance().unregister(mContext);
 
         Intent intent = new Intent(mContext, LocationAlarm.class);
         PendingIntent sender = PendingIntent.getBroadcast(mContext, 0, intent, 0);
@@ -65,21 +73,25 @@ public class LocationAlarm extends BroadcastReceiver {
 
                     updateLocation(location.getLatitude(), location.getLongitude());
 
-                    BusProvider.getInstance().post(produceLocation(location));
+                    // If updating location success
+                    // then broadcast to activity to refresh maps
+                    BusProvider.getInstance().post(new EventBusLocation(true, location));
 
-                    //tell listener of location update listener.onLocationUpdate(location)
                 } else {
 
                     Log.e(TAG, mContext.getString(R.string.error_message_location));
 
+                    // If updating location failed
+                    // then broadcast to activity to don't refresh maps
+                    BusProvider.getInstance().post(new EventBusLocation(false, null));
+
+
                 }
             }
         });
+
     }
 
-    @Produce public Location produceLocation(Location location){
-        return location;
-    }
 
 
     private void updateLocation(Double lat, Double lon) {
@@ -88,11 +100,17 @@ public class LocationAlarm extends BroadcastReceiver {
             @Override
             public void onSaveParseObject(ParseObject parseObject) {
 
+
+
             }
 
             @Override
             public void onError(ParseException pe) {
                 pe.printStackTrace();
+
+
+
+
             }
         });
 

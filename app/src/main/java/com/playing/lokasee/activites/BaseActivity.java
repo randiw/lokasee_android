@@ -68,7 +68,7 @@ public abstract class BaseActivity extends FragmentActivity {
             }
 
             locationAlarm.cancelAlarm(getApplicationContext());
-            locationAlarm.setAlarm(getApplicationContext(), (int) TimeUnit.MINUTES.toMillis(15));
+            locationAlarm.setAlarm(getApplicationContext(),  TimeUnit.SECONDS.toMillis(10));
         }
     }
 
@@ -80,7 +80,7 @@ public abstract class BaseActivity extends FragmentActivity {
             }
 
             locationAlarm.cancelAlarm(getApplicationContext());
-            locationAlarm.setAlarm(getApplicationContext(), TimeUnit.HOURS.toMillis(1));
+            locationAlarm.setAlarm(getApplicationContext(), TimeUnit.MINUTES.toMillis(10));
         }
     }
 }

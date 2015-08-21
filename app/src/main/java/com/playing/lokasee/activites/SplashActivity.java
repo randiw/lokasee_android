@@ -77,11 +77,12 @@ public class SplashActivity extends BaseActivity {
         });
     }
 
+
     private void finishSplash() {
         if (isFinishCountDown && isLocationRetrieved) {
             Intent intent;
             if (ParseUser.getCurrentUser() != null && AccessToken.getCurrentAccessToken() != null) {
-                intent = new Intent(getApplicationContext(), HomeMapsActivity.class);
+                intent = new Intent(getApplicationContext(), MainActivity.class);
             } else {
                 intent = new Intent(getApplicationContext(), LoginActivity.class);
             }
