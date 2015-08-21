@@ -25,6 +25,7 @@ import com.playing.lokasee.R;
 import com.playing.lokasee.User;
 import com.playing.lokasee.UserDao;
 import com.playing.lokasee.helper.DataHelper;
+import com.playing.lokasee.receiver.LocationAlarm;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,7 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
     private UserDao userDao;
     private SQLiteDatabase db;
 
+    private LocationAlarm alarm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,9 +60,11 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
         initDb();
         initData();
     }
+
 
     private void initData() {
         userId = DataHelper.getString("userId");
@@ -76,6 +80,11 @@ public class HomeMapsActivity extends BaseActivity implements OnMapReadyCallback
         userDao = daoSession.getUserDao();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
 
     private void insLocalDb(String name, Double lat, Double lon) {
         User user = new User(null, objectId, userId, name, lat, lon);

@@ -1,10 +1,14 @@
 package com.playing.lokasee;
 
+import android.app.Activity;
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 
 import com.facebook.FacebookSdk;
 import com.parse.Parse;
+import com.playing.lokasee.activites.MainActivity;
+import com.playing.lokasee.activites.SplashActivity;
 import com.playing.lokasee.helper.DataHelper;
 
 /**
@@ -18,6 +22,8 @@ public class LokaseeApplication extends Application {
 
     private DaoSession daoSession;
 
+    private boolean inForegound;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -29,6 +35,7 @@ public class LokaseeApplication extends Application {
         setupParse();
 
         setupDatabase();
+
     }
 
     public static synchronized LokaseeApplication getInstance() {
@@ -50,4 +57,9 @@ public class LokaseeApplication extends Application {
     public DaoSession getDaoSession() {
         return daoSession;
     }
+
+    public boolean isInForegound(){
+        return inForegound;
+    }
+
 }
