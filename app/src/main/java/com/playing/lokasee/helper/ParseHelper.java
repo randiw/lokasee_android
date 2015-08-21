@@ -82,6 +82,7 @@ public class ParseHelper {
     public void getAllUser(final OnParseQueryListener onParseQueryListener) {
         ParseQuery<ParseObject> locationQuery = new ParseQuery<ParseObject>(LOCATION);
         locationQuery.whereNotEqualTo(UserDao.Properties.Facebook_id.name, UserData.getFacebookId());
+        locationQuery.orderByDescending("updatedAt");
         locationQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {

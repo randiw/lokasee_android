@@ -1,8 +1,17 @@
 package com.playing.lokasee.activites;
 
+import android.app.ActionBar;
+import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.v4.app.FragmentActivity;
+<<<<<<< HEAD
 import android.util.Log;
+=======
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+>>>>>>> 7ecef7ecbebe1504e58246fa7b2480ad5b42c44c
 
 import com.facebook.appevents.AppEventsLogger;
 import com.playing.lokasee.User;
@@ -18,14 +27,39 @@ import butterknife.ButterKnife;
  */
 public abstract class BaseActivity extends FragmentActivity {
 
+<<<<<<< HEAD
     private LocationAlarm locationAlarm;
     private static int ALARM_SHORT = 30000; // 30 Second
     private static int ALARM_LONG = 60000; // 1 Minutes
 
+=======
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initActionBar();
+    }
+>>>>>>> 7ecef7ecbebe1504e58246fa7b2480ad5b42c44c
 
     protected void setupLayout(@LayoutRes int layout) {
         setContentView(layout);
         ButterKnife.bind(this);
+    }
+
+    private void initActionBar() {
+        View customActionBar = createActionBar(LayoutInflater.from(getApplicationContext()));
+        initActionBar(customActionBar);
+    }
+
+    protected void initActionBar(View customActionBar) {
+        if(customActionBar != null) {
+            ActionBar actionBar = getActionBar();
+            actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+            actionBar.setCustomView(customActionBar);
+        }
+    }
+
+    protected View createActionBar(LayoutInflater inflater) {
+        return null;
     }
 
     @Override
@@ -82,5 +116,10 @@ public abstract class BaseActivity extends FragmentActivity {
             locationAlarm.cancelAlarm(getApplicationContext());
             locationAlarm.setAlarm(getApplicationContext(), TimeUnit.MINUTES.toMillis(10));
         }
+    }
+
+    protected void setFullScreen() {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 }

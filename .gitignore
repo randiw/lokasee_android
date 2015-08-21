@@ -13,3 +13,5 @@ lokasee_android.iml
 .idea/gradle.xml
 .idea/runConfigurations.xml
 .idea/vcs.xml
+.idea/
+*.iml
