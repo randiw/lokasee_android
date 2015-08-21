@@ -3,9 +3,29 @@
     style="@style/activity"
     tools:context=".MainActivity">
 
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.MapFragment"
-        style="@style/MatchParent" />
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
+        style="@style/MatchParent">
+
+        <FrameLayout style="@style/MatchParent">
+
+            <fragment
+                android:id="@+id/map"
+                android:name="com.google.android.gms.maps.MapFragment"
+                style="@style/MatchParent" />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/side_drawer"
+            style="@style/MatchParent"
+            android:layout_width="240dp"
+            android:layout_gravity="left"
+            android:background="@color/material_blue_grey_800"
+            android:orientation="vertical">
+
+        </LinearLayout>
+
+    </android.support.v4.widget.DrawerLayout>
 
 </RelativeLayout>

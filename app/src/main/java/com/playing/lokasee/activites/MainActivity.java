@@ -1,8 +1,14 @@
 package com.playing.lokasee.activites;
 
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.widget.DrawerLayout;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.balysv.materialmenu.MaterialMenuDrawable;
+import com.balysv.materialmenu.MaterialMenuView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -22,9 +28,18 @@ import com.playing.lokasee.repositories.UserRepository;
 import java.util.Hashtable;
 import java.util.List;
 
-public class MainActivity extends BaseActivity implements OnMapReadyCallback {
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
+public class MainActivity extends BaseActivity implements OnMapReadyCallback, View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
+    @Bind(R.id.side_drawer) LinearLayout sideDrawer;
+
+    private TextView title;
+    private MaterialMenuView materialMenu;
 
     private GoogleMap googleMap;
     private Marker myMarker;
@@ -35,8 +50,60 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setupLayout(R.layout.activity_main);
 
+        drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                materialMenu.setTransformationOffset(MaterialMenuDrawable.AnimationState.BURGER_ARROW, drawerLayout.isDrawerOpen(sideDrawer) ? 2 - slideOffset : slideOffset);
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                if (newState == DrawerLayout.STATE_IDLE) {
+                    if (drawerLayout.isDrawerOpen(sideDrawer)) {
+                        materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
+                    } else {
+                        materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
+                    }
+                }
+                super.onDrawerStateChanged(newState);
+            }
+        });
+
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    protected View createActionBar(LayoutInflater inflater) {
+        View actionbar = inflater.inflate(R.layout.actionbar, null);
+
+        title = ButterKnife.findById(actionbar, R.id.title);
+        title.setText(R.string.app_name);
+
+        materialMenu = ButterKnife.findById(actionbar, R.id.menuIcon);
+        materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
+        materialMenu.setOnClickListener(this);
+
+        return actionbar;
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (drawerLayout.isDrawerOpen(sideDrawer)) {
+            drawerLayout.closeDrawer(sideDrawer);
+        } else {
+            drawerLayout.openDrawer(sideDrawer);
+        }
     }
 
     @Override
@@ -83,16 +150,16 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
     private void updateMarker() {
         List<User> users = UserRepository.getAll();
-        if(users == null){
+        if (users == null) {
             return;
         }
 
-        if(markers == null) {
+        if (markers == null) {
             markers = new Hashtable<>();
         }
-        for(User user : users) {
+        for (User user : users) {
             LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
-            if(!markers.contains(user.getObject_id())) {
+            if (!markers.contains(user.getObject_id())) {
                 Marker userMarker = googleMap.addMarker(new MarkerOptions()
                         .position(latLng)
                         .title(user.getName())

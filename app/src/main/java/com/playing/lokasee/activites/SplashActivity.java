@@ -7,6 +7,7 @@ import android.os.CountDownTimer;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
+import com.google.android.gms.location.LocationRequest;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -14,7 +15,10 @@ import com.playing.lokasee.R;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 
+import java.util.concurrent.TimeUnit;
+
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
+import rx.Observable;
 import rx.functions.Action1;
 
 /**
@@ -26,13 +30,17 @@ public class SplashActivity extends BaseActivity {
     private static final int SPLASH_INTERVAL = 500;
 
     private boolean isFinishCountDown;
-    private boolean isLocationRetrieved;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setFullScreen();
         setupLayout(R.layout.activity_splash);
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
         new CountDownTimer(SPLASH_TIME, SPLASH_INTERVAL) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -54,7 +62,6 @@ public class SplashActivity extends BaseActivity {
         locationProvider.getLastKnownLocation().subscribe(new Action1<Location>() {
             @Override
             public void call(Location location) {
-                isLocationRetrieved = true;
                 if (location != null) {
                     double lat = location.getLatitude();
                     double lon = location.getLongitude();
@@ -77,11 +84,16 @@ public class SplashActivity extends BaseActivity {
 
                 finishSplash();
             }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                finishSplash();
+            }
         });
     }
 
     private void finishSplash() {
-        if (isFinishCountDown && isLocationRetrieved) {
+        if (isFinishCountDown) {
             Intent intent;
             if (ParseUser.getCurrentUser() != null && AccessToken.getCurrentAccessToken() != null) {
                 intent = new Intent(getApplicationContext(), MainActivity.class);
