@@ -41,8 +41,10 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
-    @Bind(R.id.side_drawer) LinearLayout sideDrawer;
+    @Bind(R.id.drawer_layout)
+    DrawerLayout drawerLayout;
+    @Bind(R.id.side_drawer)
+    LinearLayout sideDrawer;
 
     private TextView title;
     private MaterialMenuView materialMenu;
@@ -198,14 +200,12 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
     public void onEventBusLocation(EventBusLocation eventBusLocation) {
 
         Log.i(TAG, String.valueOf(eventBusLocation.getLocation().getLatitude()));
-
         try {
             if (eventBusLocation.isStatMapRefresh()) {
                 if (googleMap != null && markers != null) {
                     Log.i(TAG, "Clear Map");
                     retrieveMarkers();
-                    setMyLocation(eventBusLocation.getLocation().getLatitude(),eventBusLocation.getLocation().getLongitude(), DataHelper.getString("name"));
-
+                    setMyLocation(eventBusLocation.getLocation().getLatitude(), eventBusLocation.getLocation().getLongitude(), DataHelper.getString("name"));
                 }
             }
         } catch (Exception ex) {

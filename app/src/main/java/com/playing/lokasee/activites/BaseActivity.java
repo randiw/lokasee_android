@@ -10,8 +10,10 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.facebook.appevents.AppEventsLogger;
+import com.playing.lokasee.UserDao;
 import com.playing.lokasee.helper.UserData;
 import com.playing.lokasee.receiver.LocationAlarm;
+import com.playing.lokasee.repositories.UserRepository;
 
 import java.util.concurrent.TimeUnit;
 
@@ -84,27 +86,26 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     private void setAlarmShort() {
-
-        if (UserData.isLogin()) {
+        if (UserRepository.isDataExist()) {
 
             if(locationAlarm == null){
                 locationAlarm = new LocationAlarm();
             }
 
             locationAlarm.cancelAlarm(getApplicationContext());
-            locationAlarm.setAlarm(getApplicationContext(),  TimeUnit.SECONDS.toMillis(10));
+            locationAlarm.setAlarm(getApplicationContext(),  TimeUnit.MINUTES.toMillis(1));
         }
     }
 
     private void setAlarmLong() {
-        if (UserData.isLogin()) {
+        if (UserRepository.isDataExist()) {
 
             if(locationAlarm == null){
                 locationAlarm = new LocationAlarm();
             }
 
             locationAlarm.cancelAlarm(getApplicationContext());
-            locationAlarm.setAlarm(getApplicationContext(), TimeUnit.MINUTES.toMillis(10));
+            locationAlarm.setAlarm(getApplicationContext(), TimeUnit.HOURS.toMillis(1));
         }
     }
 

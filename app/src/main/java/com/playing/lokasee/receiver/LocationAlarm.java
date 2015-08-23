@@ -13,6 +13,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.playing.lokasee.R;
 import com.playing.lokasee.helper.BusProvider;
+import com.playing.lokasee.helper.LocationManager;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 import com.playing.lokasee.models.EventBusLocation;
@@ -27,10 +28,6 @@ import rx.functions.Action1;
 public class LocationAlarm extends BroadcastReceiver {
 
     private static final String TAG = LocationAlarm.class.getSimpleName();
-
-
-
-
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -50,7 +47,7 @@ public class LocationAlarm extends BroadcastReceiver {
         am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), durationTime, pi);
     }
 
-    public void cancelAlarm(Context mContext){
+    public void cancelAlarm(Context mContext) {
 
         BusProvider.getInstance().unregister(mContext);
 
@@ -62,60 +59,43 @@ public class LocationAlarm extends BroadcastReceiver {
 
     private void detectLocation(final Context mContext) {
 
-        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(mContext);
-        locationProvider.getLastKnownLocation().subscribe(new Action1<Location>() {
+        LocationManager.checkLocation(mContext).subscribe(new Action1<Location>() {
             @Override
             public void call(Location location) {
-
                 if (location != null) {
 
                     UserData.saveLocation(Double.toString(location.getLatitude()), Double.toString(location.getLongitude()));
-
                     updateLocation(location.getLatitude(), location.getLongitude());
-
                     // If updating location success
                     // then broadcast to activity to refresh maps
                     BusProvider.getInstance().post(new EventBusLocation(true, location));
-
                 } else {
 
                     Log.e(TAG, mContext.getString(R.string.error_message_location));
-
                     // If updating location failed
                     // then broadcast to activity to don't refresh maps
                     BusProvider.getInstance().post(new EventBusLocation(false, null));
-
-
                 }
             }
-        });
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
 
+            }
+        });
     }
 
 
-
     private void updateLocation(Double lat, Double lon) {
-
         ParseHelper.getInstance().saveMyLocation(lat, lon, new ParseHelper.OnSaveParseObjectListener() {
             @Override
             public void onSaveParseObject(ParseObject parseObject) {
-
-
-
             }
 
             @Override
             public void onError(ParseException pe) {
                 pe.printStackTrace();
-
-
-
-
             }
         });
-
     }
-
-
-
 }
