@@ -2,6 +2,7 @@ package com.playing.lokasee.activites;
 
 import android.app.LoaderManager;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import com.playing.lokasee.UserDao;
 import com.playing.lokasee.view.adapter.UserContentProvider;
 import com.playing.lokasee.view.adapter.UserCursorAdapter;
 
+import com.playing.lokasee.DaoMaster;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnItemClick;

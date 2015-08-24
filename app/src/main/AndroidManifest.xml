@@ -32,7 +32,9 @@
             android:value="@string/facebook_app_id" />
 
         <!-- activities-->
-        <activity android:name=".activites.SplashActivity">
+        <activity
+            android:name=".activites.SplashActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

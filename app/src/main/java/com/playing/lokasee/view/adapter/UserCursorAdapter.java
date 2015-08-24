@@ -53,7 +53,7 @@ public class UserCursorAdapter extends CursorAdapter {
 
         ViewHolder holder = new ViewHolder(customListView);
         customListView.setTag(holder);
-
+        Log.e(tag, "masuk newView");
         return customListView;
     }
 

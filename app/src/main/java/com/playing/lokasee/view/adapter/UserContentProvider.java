@@ -31,7 +31,11 @@ public class UserContentProvider extends ContentProvider {
         uriMatcher.addURI(AUTHORITY, TABLE_NAME + "/#", USERS);
     }
 
-    DaoSession daoSession;
+    private static DaoSession daoSession;
+
+    public static void setDaoSession(DaoSession _daoSession){
+        daoSession = _daoSession;
+    }
 
     protected SQLiteDatabase getDatabase(){
         if(daoSession == null){
@@ -61,8 +65,7 @@ public class UserContentProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
-        SQLiteDatabase db = getDatabase();
-        Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+        Cursor cursor = queryBuilder.query(daoSession.getDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
     }
