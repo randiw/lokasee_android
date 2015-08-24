@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.facebook.FacebookSdk;
 import com.parse.Parse;
 import com.playing.lokasee.helper.DataHelper;
+import com.playing.lokasee.view.adapter.UserContentProvider;
 
 /**
  * Created by mexan on 8/18/15.
@@ -45,7 +46,10 @@ public class LokaseeApplication extends Application {
         SQLiteDatabase db = helper.getWritableDatabase();
         DaoMaster daoMaster = new DaoMaster(db);
         daoSession = daoMaster.newSession();
+
+        UserContentProvider.setDaoSession(daoSession);
     }
+
 
     public DaoSession getDaoSession() {
         return daoSession;

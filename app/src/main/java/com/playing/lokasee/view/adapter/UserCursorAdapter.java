@@ -2,6 +2,7 @@ package com.playing.lokasee.view.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +10,9 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.playing.lokasee.R;
+import com.playing.lokasee.User;
 import com.playing.lokasee.UserDao;
+import com.playing.lokasee.repositories.UserRepository;
 import com.playing.lokasee.tools.RepoTools;
 
 import butterknife.Bind;
@@ -20,8 +23,28 @@ import butterknife.ButterKnife;
  */
 public class UserCursorAdapter extends CursorAdapter {
 
+    private static String tag = UserCursorAdapter.class.getSimpleName();
+
     public UserCursorAdapter(Context context) {
         super(context, null, false);
+    }
+
+    @Override
+    public User getItem(int position) {
+        Cursor cursor = getCursor();
+        if(!cursor.moveToPosition(position)){
+            return null;
+        }
+        return UserRepository.create(cursor);
+    }
+
+    @Override
+    public int getCount() {
+        Cursor cursor = getCursor();
+        if(cursor == null) {
+            return 0;
+        }
+        return cursor.getCount();
     }
 
     @Override
@@ -39,6 +62,7 @@ public class UserCursorAdapter extends CursorAdapter {
         ViewHolder holder = (ViewHolder) view.getTag();
 
         String name = RepoTools.getString(cursor, UserDao.Properties.Name.columnName);
+        Log.e(tag, name);
         holder.user.setText(name);
     }
 
