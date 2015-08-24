@@ -26,6 +26,23 @@ public abstract class BaseActivity extends FragmentActivity {
 
     private LocationAlarm locationAlarm;
 
+    private enum Alarm {
+        SHORT(TimeUnit.MINUTES, 1),
+        LONG(TimeUnit.HOURS, 1);
+
+        private TimeUnit timeUnit;
+        private int timeValue;
+
+        private Alarm(TimeUnit timeUnit, int timeValue) {
+            this.timeUnit = timeUnit;
+            this.timeValue = timeValue;
+        }
+
+        public long time() {
+            return timeUnit.toMillis(timeValue);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +60,7 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     protected void initActionBar(View customActionBar) {
-        if(customActionBar != null) {
+        if (customActionBar != null) {
             ActionBar actionBar = getActionBar();
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
             actionBar.setCustomView(customActionBar);
@@ -58,55 +75,22 @@ public abstract class BaseActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         AppEventsLogger.activateApp(this);
-
-        setAlarmShort();
+        startAlarm(Alarm.SHORT);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         AppEventsLogger.deactivateApp(this);
-
-        setAlarmLong();
+        startAlarm(Alarm.LONG);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        setAlarmShort();
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        setAlarmLong();
-    }
-
-    private void setAlarmShort() {
-        if (UserRepository.isDataExist()) {
-
-            if(locationAlarm == null){
-                locationAlarm = new LocationAlarm();
-            }
-
-            locationAlarm.cancelAlarm(getApplicationContext());
-            locationAlarm.setAlarm(getApplicationContext(),  TimeUnit.MINUTES.toMillis(1));
+    private void startAlarm(Alarm alarm) {
+        if(locationAlarm == null) {
+            locationAlarm = new LocationAlarm();
         }
-    }
-
-    private void setAlarmLong() {
-        if (UserRepository.isDataExist()) {
-
-            if(locationAlarm == null){
-                locationAlarm = new LocationAlarm();
-            }
-
-            locationAlarm.cancelAlarm(getApplicationContext());
-            locationAlarm.setAlarm(getApplicationContext(), TimeUnit.HOURS.toMillis(1));
-        }
+        locationAlarm.cancelAlarm(getApplicationContext());
+        locationAlarm.setAlarm(getApplicationContext(), alarm.time());
     }
 
     protected void setFullScreen() {

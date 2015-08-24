@@ -55,7 +55,6 @@ public class UserRepository {
     }
 
     public static boolean isDataExist(){
-
         return LokaseeApplication.getInstance().getDaoSession().getUserDao().count() > 0;
     }
 }

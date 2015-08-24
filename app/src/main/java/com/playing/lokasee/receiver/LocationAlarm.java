@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseUser;
 import com.playing.lokasee.R;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.LocationManager;
@@ -65,9 +66,11 @@ public class LocationAlarm extends BroadcastReceiver {
                 if (location != null) {
 
                     UserData.saveLocation(Double.toString(location.getLatitude()), Double.toString(location.getLongitude()));
-                    updateLocation(location.getLatitude(), location.getLongitude());
-                    // If updating location success
-                    // then broadcast to activity to refresh maps
+                    if(ParseUser.getCurrentUser() != null) {
+                        updateLocation(location.getLatitude(), location.getLongitude());
+                    }
+
+                    // If updating location success // then broadcast to activity to refresh maps
                     BusProvider.getInstance().post(new EventBusLocation(true, location));
                 } else {
 

@@ -5,7 +5,6 @@ import android.location.Location;
 
 import com.google.android.gms.location.LocationRequest;
 
-
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
 
@@ -15,7 +14,7 @@ import rx.Observable;
 public class LocationManager {
 
     private static final int NUM_UPDATES_INTERVAL = 5;
-    private static final int INTERVAL = 100;
+    private static final int INTERVAL = 1000;
 
     public static Observable<Location> checkLocation(Context mContext) {
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(mContext);
