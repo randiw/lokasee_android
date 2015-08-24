@@ -7,15 +7,14 @@ import android.os.CountDownTimer;
 import android.util.Log;
 
 import com.facebook.AccessToken;
-import com.facebook.FacebookSdk;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.playing.lokasee.R;
+import com.playing.lokasee.helper.LocationManager;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 
-import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.functions.Action1;
 
 /**
@@ -27,15 +26,17 @@ public class SplashActivity extends BaseActivity {
     private static final int SPLASH_INTERVAL = 500;
     private static final String tag = SplashActivity.class.getSimpleName();
     private boolean isFinishCountDown;
-    private boolean isLocationRetrieved;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setFullScreen();
         setupLayout(R.layout.activity_splash);
+    }
 
-        FacebookSdk.sdkInitialize(getApplicationContext());
-
+    @Override
+    protected void onStart() {
+        super.onStart();
         new CountDownTimer(SPLASH_TIME, SPLASH_INTERVAL) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -53,12 +54,9 @@ public class SplashActivity extends BaseActivity {
     }
 
     private void retrieveLocation() {
-        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(getApplicationContext());
-        locationProvider.getLastKnownLocation().subscribe(new Action1<Location>() {
+        LocationManager.checkLocation(getApplicationContext()).subscribe(new Action1<Location>() {
             @Override
             public void call(Location location) {
-                Log.d(tag, "location response");
-                isLocationRetrieved = true;
                 if (location != null) {
                     double lat = location.getLatitude();
                     double lon = location.getLongitude();
@@ -78,20 +76,19 @@ public class SplashActivity extends BaseActivity {
                         });
                     }
                 }
-
-                finishSplash();
             }
         }, new Action1<Throwable>() {
             @Override
             public void call(Throwable throwable) {
-                Log.d(tag, "throwable " + throwable.getMessage());
                 finishSplash();
             }
         });
     }
 
+
     private void finishSplash() {
-        if (isFinishCountDown || isLocationRetrieved) {
+//        if (isFinishCountDown || isLocationRetrieved) {
+        if (isFinishCountDown) {
             Intent intent;
             if (ParseUser.getCurrentUser() != null && AccessToken.getCurrentAccessToken() != null) {
                 intent = new Intent(getApplicationContext(), MainActivity.class);

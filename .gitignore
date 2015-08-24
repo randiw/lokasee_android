@@ -9,3 +9,9 @@
 .idea/misc.xml
 .idea/modules.xml
 app/app.iml
+lokasee_android.iml
+.idea/gradle.xml
+.idea/runConfigurations.xml
+.idea/vcs.xml
+.idea/
+*.iml

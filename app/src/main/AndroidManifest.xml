@@ -43,7 +43,6 @@
         </activity>
         <activity android:name=".activites.LoginActivity" />
         <activity android:name=".activites.MainActivity" />
-        <activity android:name=".activites.HomeMapsActivity" />
         <activity android:name=".activites.SearchActivity"/>
         <activity android:name=".activites.SearchMapActivity"/>
         <activity
@@ -54,5 +53,7 @@
         <provider
             android:authorities="com.playing.lokasee.view.adapter.UserContentProvider"
             android:name=".view.adapter.UserContentProvider"/>
+
+        <receiver android:name=".receiver.LocationAlarm"></receiver>
     </application>
 </manifest>

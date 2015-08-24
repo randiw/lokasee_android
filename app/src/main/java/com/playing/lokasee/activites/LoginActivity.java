@@ -1,13 +1,20 @@
 package com.playing.lokasee.activites;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
+import android.view.Window;
+import android.widget.Button;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.Profile;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.parse.ParseException;
@@ -17,7 +24,14 @@ import com.playing.lokasee.R;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 
+import java.lang.reflect.Array;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
+import java.util.Arrays;
+
 import butterknife.Bind;
+import butterknife.OnClick;
 
 /**
  * Created by nabilla on 8/18/15.
@@ -26,19 +40,17 @@ public class LoginActivity extends BaseActivity {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 
-    @Bind(R.id.login_button) LoginButton loginButton;
-
-    CallbackManager callbackManager;
+    private  CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setupLayout(R.layout.activity_login);
 
         callbackManager = CallbackManager.Factory.create();
 
-        loginButton.setReadPermissions("public_profile");
-        loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Profile profile = Profile.getCurrentProfile();
@@ -56,14 +68,21 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onError(FacebookException e) {
                 Log.e(TAG, "facebookException: " + e.getMessage());
+
             }
         });
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @OnClick(R.id.btn_fb_login)
+    public void loginFb(){
+        LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile"));
     }
 
     private void signUpParse(Profile profile) {

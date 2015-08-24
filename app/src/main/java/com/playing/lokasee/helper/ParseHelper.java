@@ -82,6 +82,7 @@ public class ParseHelper {
     public void getAllUser(final OnParseQueryListener onParseQueryListener) {
         ParseQuery<ParseObject> locationQuery = new ParseQuery<ParseObject>(LOCATION);
         locationQuery.whereNotEqualTo(UserDao.Properties.Facebook_id.name, UserData.getFacebookId());
+        locationQuery.orderByDescending("updatedAt");
         locationQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> list, ParseException e) {
@@ -157,6 +158,8 @@ public class ParseHelper {
                 }
             });
         } else {
+            Log.e(TAG, "Size of user dao: " + String.valueOf(UserRepository.isDataExist()));
+
             userLocation.put(UserDao.TABLENAME.toLowerCase(), currentUser);
             userLocation.put(UserDao.Properties.Name.name, currentUser.get(UserDao.Properties.Name.name));
             userLocation.put(UserDao.Properties.Facebook_id.name, currentUser.get(UserDao.Properties.Facebook_id.name));

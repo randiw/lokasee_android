@@ -5,8 +5,13 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -32,6 +37,7 @@ public class SearchActivity extends BaseActivity implements LoaderManager.Loader
     @Bind(R.id.listUser) ListView listviewUser;
     @Bind(R.id.searchEdit) EditText searchEdit;
     UserCursorAdapter adapter;
+    String textSearch;
 
     @Override
     protected void onCreate(Bundle saveInstanceState) {
@@ -43,6 +49,28 @@ public class SearchActivity extends BaseActivity implements LoaderManager.Loader
         listviewUser.setAdapter(adapter);
 
         getLoaderManager().initLoader(LIST_ID, null, this);
+
+        searchEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(TextUtils.isEmpty(s)){
+                    textSearch = null;
+                }else{
+                    textSearch = s.toString();
+                }
+                getLoaderManager().restartLoader(LIST_ID, null, SearchActivity.this);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 
     @OnItemClick(R.id.listUser)
@@ -54,21 +82,16 @@ public class SearchActivity extends BaseActivity implements LoaderManager.Loader
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        String key = searchEdit.getText().toString().trim();
         if (LIST_ID != id) {
             return null;
         } else {
-            if(key.matches(""))
+            if(textSearch == null)
                 return new CursorLoader(SearchActivity.this, UserContentProvider.CONTENT_URI, null, null, null, null);
             else {
-                Log.e(TAG, "masuk else");
-                String[] selectionArgs = { key };
-                final String selection = UserDao.Properties.Name.name + " like %?% ";
-                Log.e(TAG, "masuk else selesei");
-                return new CursorLoader(SearchActivity.this, UserContentProvider.CONTENT_URI, null, selection, selectionArgs, null);
+                Uri baseUri = Uri.withAppendedPath(UserContentProvider.CONTENT_URI, "name/like/"+Uri.encode(textSearch));
+                return new CursorLoader(SearchActivity.this, baseUri, null, null, null, null);
             }
         }
-
     }
 
     @Override

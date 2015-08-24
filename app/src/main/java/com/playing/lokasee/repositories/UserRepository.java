@@ -70,4 +70,7 @@ public class UserRepository {
         return LokaseeApplication.getInstance().getDaoSession().getUserDao();
     }
 
+    public static boolean isDataExist(){
+        return LokaseeApplication.getInstance().getDaoSession().getUserDao().count() > 0;
+    }
 }
