@@ -2,6 +2,7 @@ package com.playing.lokasee.view.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,8 +21,11 @@ import butterknife.ButterKnife;
  */
 public class UserCursorAdapter extends CursorAdapter {
 
-    public UserCursorAdapter(Context context) {
-        super(context, null, false);
+    public static String tag = UserCursorAdapter.class.getSimpleName();
+
+    public UserCursorAdapter(Context context, Cursor c) {
+        super(context, c, false);
+        Log.e(tag, "masuk oncreate");
     }
 
     @Override
@@ -30,7 +34,7 @@ public class UserCursorAdapter extends CursorAdapter {
 
         ViewHolder holder = new ViewHolder(customListView);
         customListView.setTag(holder);
-
+        Log.e(tag, "masuk newView");
         return customListView;
     }
 
@@ -39,6 +43,7 @@ public class UserCursorAdapter extends CursorAdapter {
         ViewHolder holder = (ViewHolder) view.getTag();
 
         String name = RepoTools.getString(cursor, UserDao.Properties.Name.columnName);
+        Log.e(tag, name);
         holder.user.setText(name);
     }
 
