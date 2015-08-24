@@ -37,8 +37,8 @@ public class HarabaraTextView extends TextView {
 
     private void init(AttributeSet attrs) {
         if (attrs!=null) {
-            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.harabara_mais);
-            String fontName = a.getString(R.styleable.harabara_mais_harabara_mais);
+            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.harabara);
+            String fontName = a.getString(R.styleable.harabara_harabara);
             if (fontName!=null) {
                 Typeface myTypeface = Typeface.createFromAsset(getContext().getAssets(), fontName);
                 setTypeface(myTypeface);

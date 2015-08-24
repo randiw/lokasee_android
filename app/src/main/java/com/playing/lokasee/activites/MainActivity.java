@@ -1,14 +1,21 @@
 package com.playing.lokasee.activites;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.balysv.materialmenu.MaterialMenu;
 import com.balysv.materialmenu.MaterialMenuDrawable;
+import com.balysv.materialmenu.MaterialMenuIcon;
 import com.balysv.materialmenu.MaterialMenuView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,12 +48,13 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
-    @Bind(R.id.side_drawer) LinearLayout sideDrawer;
+    @Bind(R.id.drawer_layout)
+    DrawerLayout drawerLayout;
+    @Bind(R.id.side_drawer)
+    LinearLayout sideDrawer;
 
     private TextView title;
     private MaterialMenuView materialMenu;
-
     private GoogleMap googleMap;
     private Marker myMarker;
     private Hashtable<String, Marker> markers;
@@ -93,6 +101,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         // Register Event Bus to receive event
         // from Location Alarm
         BusProvider.getInstance().register(this);
+
+
     }
 
     @Override
@@ -112,10 +122,26 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
         materialMenu = ButterKnife.findById(actionbar, R.id.menuIcon);
         materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
-        materialMenu.setOnClickListener(this);
 
+
+        ImageButton imgRefresh = ButterKnife.findById(actionbar, R.id.action_refresh);
+        imgRefresh.setOnClickListener(lsRefresh);
+
+        materialMenu.setOnClickListener(this);
         return actionbar;
     }
+
+    View.OnClickListener lsRefresh = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (googleMap != null && markers != null) {
+                Log.i(TAG, "Clear Map");
+                retrieveMarkers();
+                setMyLocation(lat, lon, DataHelper.getString("name"));
+            }
+        }
+    };
+
 
     @Override
     public void onClick(View v) {
@@ -124,6 +150,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         } else {
             drawerLayout.openDrawer(sideDrawer);
         }
+
     }
 
     @Override
