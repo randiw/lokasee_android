@@ -10,6 +10,12 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.facebook.appevents.AppEventsLogger;
+import com.playing.lokasee.UserDao;
+import com.playing.lokasee.helper.UserData;
+import com.playing.lokasee.receiver.LocationAlarm;
+import com.playing.lokasee.repositories.UserRepository;
+
+import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 
@@ -17,6 +23,8 @@ import butterknife.ButterKnife;
  * Created by nabilla on 8/19/15.
  */
 public abstract class BaseActivity extends FragmentActivity {
+
+    private LocationAlarm locationAlarm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,12 +58,55 @@ public abstract class BaseActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         AppEventsLogger.activateApp(this);
+
+        setAlarmShort();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         AppEventsLogger.deactivateApp(this);
+
+        setAlarmLong();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        setAlarmShort();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        setAlarmLong();
+    }
+
+    private void setAlarmShort() {
+        if (UserRepository.isDataExist()) {
+
+            if(locationAlarm == null){
+                locationAlarm = new LocationAlarm();
+            }
+
+            locationAlarm.cancelAlarm(getApplicationContext());
+            locationAlarm.setAlarm(getApplicationContext(),  TimeUnit.MINUTES.toMillis(1));
+        }
+    }
+
+    private void setAlarmLong() {
+        if (UserRepository.isDataExist()) {
+
+            if(locationAlarm == null){
+                locationAlarm = new LocationAlarm();
+            }
+
+            locationAlarm.cancelAlarm(getApplicationContext());
+            locationAlarm.setAlarm(getApplicationContext(), TimeUnit.HOURS.toMillis(1));
+        }
     }
 
     protected void setFullScreen() {

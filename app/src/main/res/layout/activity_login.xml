@@ -1,10 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/MatchParent">
+    style="@style/MatchParent"
+    android:background="@color/bg.main.black"
+    android:padding="25dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
 
-    <com.facebook.login.widget.LoginButton
-        android:id="@+id/login_button"
-        style="@style/WrapContent"
-        android:layout_centerInParent="true" />
+        <ImageView
+            style="@style/WrapContent"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_lokasee" />
+
+        <com.playing.lokasee.views.HarabaraTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:text="lokasee"
+            android:textColor="#FFF"
+            android:textSize="45sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_fb_login"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bg_btn_fb"
+        android:text="Sign In With Facebook"
+        android:textColor="@color/bg.white" />
 
 </RelativeLayout>

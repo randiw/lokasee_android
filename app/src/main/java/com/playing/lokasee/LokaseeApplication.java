@@ -1,18 +1,20 @@
 package com.playing.lokasee;
 
+import android.app.Activity;
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 
 import com.facebook.FacebookSdk;
 import com.parse.Parse;
+import com.playing.lokasee.activites.MainActivity;
+import com.playing.lokasee.activites.SplashActivity;
 import com.playing.lokasee.helper.DataHelper;
 
 /**
  * Created by mexan on 8/18/15.
  */
 public class LokaseeApplication extends Application {
-
-    public static final String TAG = LokaseeApplication.class.getSimpleName();
 
     private static LokaseeApplication instance;
 
@@ -29,6 +31,7 @@ public class LokaseeApplication extends Application {
         setupParse();
 
         setupDatabase();
+
     }
 
     public static synchronized LokaseeApplication getInstance() {
@@ -50,4 +53,6 @@ public class LokaseeApplication extends Application {
     public DaoSession getDaoSession() {
         return daoSession;
     }
+
+
 }

@@ -2,6 +2,7 @@ package com.playing.lokasee.activites;
 
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -21,9 +22,14 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
+import com.playing.lokasee.helper.BusProvider;
+import com.playing.lokasee.helper.DataHelper;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
+import com.playing.lokasee.models.EventBusLocation;
+import com.playing.lokasee.receiver.LocationAlarm;
 import com.playing.lokasee.repositories.UserRepository;
+import com.squareup.otto.Subscribe;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -35,8 +41,10 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
-    @Bind(R.id.side_drawer) LinearLayout sideDrawer;
+    @Bind(R.id.drawer_layout)
+    DrawerLayout drawerLayout;
+    @Bind(R.id.side_drawer)
+    LinearLayout sideDrawer;
 
     private TextView title;
     private MaterialMenuView materialMenu;
@@ -44,6 +52,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
     private GoogleMap googleMap;
     private Marker myMarker;
     private Hashtable<String, Marker> markers;
+    private double lat;
+    private double lon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +91,18 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        // Register Event Bus to receive event
+        // from Location Alarm
+        BusProvider.getInstance().register(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Unregister Event Bus if application closed
+        BusProvider.getInstance().unregister(this);
     }
 
     @Override
@@ -110,14 +132,14 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
 
-        double lat = Double.parseDouble(UserData.getLatitude());
-        double lon = Double.parseDouble(UserData.getLongitude());
+        lat = Double.parseDouble(UserData.getLatitude());
+        lon = Double.parseDouble(UserData.getLongitude());
 
-        setMyLocation(lat, lon);
+        setMyLocation(lat, lon, DataHelper.getString("name"));
         retrieveMarkers();
     }
 
-    private void setMyLocation(double latitude, double longitude) {
+    private void setMyLocation(double latitude, double longitude, String name) {
         if (googleMap != null) {
             LatLng position = new LatLng(latitude, longitude);
             float zoom = 14.0f;
@@ -125,7 +147,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
             if (myMarker == null) {
                 myMarker = googleMap.addMarker(new MarkerOptions()
                         .position(position)
-                        .title("I am here"));
+                        .title(name));
             } else {
                 myMarker.setPosition(position);
             }
@@ -172,4 +194,24 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
             }
         }
     }
+
+
+    @Subscribe
+    public void onEventBusLocation(EventBusLocation eventBusLocation) {
+
+        Log.i(TAG, String.valueOf(eventBusLocation.getLocation().getLatitude()));
+        try {
+            if (eventBusLocation.isStatMapRefresh()) {
+                if (googleMap != null && markers != null) {
+                    Log.i(TAG, "Clear Map");
+                    retrieveMarkers();
+                    setMyLocation(eventBusLocation.getLocation().getLatitude(), eventBusLocation.getLocation().getLongitude(), DataHelper.getString("name"));
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
 }

@@ -1,12 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/activity">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg.main.black">
 
-    <ImageView
-        style="@style/WrapContent"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
-        android:src="@drawable/peta_lokasi" />
+        android:orientation="vertical">
+
+        <ImageView
+            style="@style/WrapContent"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_lokasee" />
+
+        <com.playing.lokasee.views.HarabaraTextView
+            android:layout_width="wrap_content"
+            android:text="lokasee"
+            android:textStyle="bold"
+            android:textColor="#FFF"
+            android:layout_marginTop="15dp"
+            android:textSize="45sp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
 
 </RelativeLayout>
