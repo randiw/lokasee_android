@@ -16,6 +16,7 @@ public class MyDaoGenerator {
         user.addStringProperty("name");
         user.addDoubleProperty("latitude");
         user.addDoubleProperty("longitude");
+        user.addStringProperty("url_prof_pic");
 
         new DaoGenerator().generateAll(schema, args[0]);
     }

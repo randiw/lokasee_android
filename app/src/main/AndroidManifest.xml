@@ -31,7 +31,9 @@
             android:value="@string/facebook_app_id" />
 
         <!-- activities-->
-        <activity android:name=".activites.SplashActivity">
+        <activity
+            android:name=".activites.SplashActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -40,14 +42,22 @@
         </activity>
         <activity android:name=".activites.LoginActivity" />
         <activity android:name=".activites.MainActivity" />
-
+        <activity android:name=".activites.SearchActivity"/>
+        <activity android:name=".activites.SearchMapActivity"/>
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <provider
+            android:authorities="com.playing.lokasee.view.adapter.UserContentProvider"
+            android:name=".view.adapter.UserContentProvider"/>
 
         <receiver android:name=".receiver.LocationAlarm"></receiver>
 
+
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="79aef01e064ef989312507835ca4807799a2919b" />
     </application>
 </manifest>

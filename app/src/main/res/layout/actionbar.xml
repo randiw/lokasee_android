@@ -14,10 +14,16 @@
         android:layout_marginLeft="5dp"
         app:mm_color="@android:color/white" />
 
-    <ImageButton
+    <com.github.johnkil.print.PrintView
+        xmlns:print="http://schemas.android.com/apk/res-auto"
         android:id="@+id/action_refresh"
-        android:layout_width="wrap_content"
-        android:src="@android:drawable/ic_popup_sync"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
         android:layout_alignParentRight="true"
-        android:layout_height="wrap_content" />
+        android:layout_centerVertical="true"
+        android:padding="10dp"
+        print:iconColor="@android:color/white"
+        print:iconSize="22dp"
+        print:iconText="@string/ic_material_refresh" />
+
 </RelativeLayout>

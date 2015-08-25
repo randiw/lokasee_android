@@ -1,11 +1,15 @@
 package com.playing.lokasee.repositories;
 
+import android.database.Cursor;
+
 import com.playing.lokasee.LokaseeApplication;
 import com.playing.lokasee.User;
 import com.playing.lokasee.UserDao;
 import com.playing.lokasee.tools.RepoTools;
 
 import java.util.List;
+
+import de.greenrobot.dao.query.QueryBuilder;
 
 /**
  * Created by randi on 8/20/15.
@@ -50,11 +54,20 @@ public class UserRepository {
         return users;
     }
 
-    private static UserDao getUserDao() {
-        return LokaseeApplication.getInstance().getDaoSession().getUserDao();
+    public static User create(Cursor cursor) {
+        long id = RepoTools.getLong(cursor, UserDao.Properties.Id.columnName);
+        String object_id = RepoTools.getString(cursor, UserDao.Properties.Object_id.columnName);
+        String facebook_id = RepoTools.getString(cursor, UserDao.Properties.Facebook_id.columnName);
+        String name = RepoTools.getString(cursor, UserDao.Properties.Name.columnName);
+        double latitude = RepoTools.getDouble(cursor, UserDao.Properties.Latitude.columnName);
+        double longitude = RepoTools.getDouble(cursor, UserDao.Properties.Longitude.columnName);
+        String url_prof_pic = RepoTools.getString(cursor, UserDao.Properties.Url_prof_pic.columnName);
+
+        User user = new User(id, object_id, facebook_id, name, latitude, longitude, url_prof_pic);
+        return user;
     }
 
-    public static boolean isDataExist(){
-        return LokaseeApplication.getInstance().getDaoSession().getUserDao().count() > 0;
+    private static UserDao getUserDao() {
+        return LokaseeApplication.getInstance().getDaoSession().getUserDao();
     }
 }
