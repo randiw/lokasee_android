@@ -88,8 +88,8 @@ public class SearchActivity extends BaseActivity implements LoaderManager.Loader
             if(textSearch == null)
                 return new CursorLoader(SearchActivity.this, UserContentProvider.CONTENT_URI, null, null, null, null);
             else {
-                Uri baseUri = Uri.withAppendedPath(UserContentProvider.CONTENT_URI, "name/like/"+Uri.encode(textSearch));
-                return new CursorLoader(SearchActivity.this, baseUri, null, null, null, null);
+                String selection = UserDao.Properties.Name.columnName + " like '" + textSearch.toString() + "%'";
+                return new CursorLoader(SearchActivity.this, UserContentProvider.CONTENT_URI, null, selection, null, null);
             }
         }
     }
