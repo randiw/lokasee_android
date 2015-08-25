@@ -2,7 +2,6 @@ package com.playing.lokasee.activites;
 
 import android.content.Intent;
 import android.location.Location;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -16,7 +15,7 @@ import com.parse.ParseUser;
 import com.playing.lokasee.R;
 import com.playing.lokasee.helper.LocationManager;
 import com.playing.lokasee.helper.ParseHelper;
-import com.playing.lokasee.helper.TypeFaceHelper;
+import com.playing.lokasee.helper.FontLibHelper;
 import com.playing.lokasee.helper.UserData;
 
 import butterknife.Bind;
@@ -27,14 +26,14 @@ import rx.functions.Action1;
  */
 public class SplashActivity extends BaseActivity {
 
+    private static final String TAG = SplashActivity.class.getSimpleName();
+
     private static final int SPLASH_TIME = 3000;
     private static final int SPLASH_INTERVAL = 500;
-    private static final  String TAG =  SplashActivity.class.getSimpleName();
 
     private boolean isFinishCountDown;
 
-    @Bind(R.id.txt_icon_lokasee)
-    TextView txtTitle;
+    @Bind(R.id.txt_icon_lokasee) TextView txtTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +41,13 @@ public class SplashActivity extends BaseActivity {
         setFullScreen();
         setupLayout(R.layout.activity_splash);
 
-        // Set type face
-        TypefaceHelper.typeface(txtTitle, TypeFaceHelper.getHarbaraFace());
+        TypefaceHelper.typeface(txtTitle, FontLibHelper.getHarbaraFace());
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+
         new CountDownTimer(SPLASH_TIME, SPLASH_INTERVAL) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -69,12 +68,9 @@ public class SplashActivity extends BaseActivity {
         LocationManager.checkLocation(getApplicationContext()).subscribe(new Action1<Location>() {
             @Override
             public void call(Location location) {
-
                 if (location != null) {
                     double lat = location.getLatitude();
                     double lon = location.getLongitude();
-
-
 
                     UserData.saveLocation(Double.toString(lat), Double.toString(lon));
                     if (ParseUser.getCurrentUser() != null) {
@@ -90,9 +86,8 @@ public class SplashActivity extends BaseActivity {
                             }
                         });
                     }
-                }else{
+                } else {
                     Log.i(TAG, "location null");
-
                 }
             }
         }, new Action1<Throwable>() {
@@ -102,7 +97,6 @@ public class SplashActivity extends BaseActivity {
             }
         });
     }
-
 
     private void finishSplash() {
         if (isFinishCountDown) {

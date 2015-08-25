@@ -49,5 +49,8 @@
 
         <receiver android:name=".receiver.LocationAlarm"></receiver>
 
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="79aef01e064ef989312507835ca4807799a2919b" />
     </application>
 </manifest>

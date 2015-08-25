@@ -4,6 +4,9 @@
     <string name="parse_client_id">FP5864k1ryudSZjTNGhrtltuYTe1qWwzjM2TuQnR</string>
     <string name="facebook_app_id">931534460236585</string>
 
+    <!-- fonts -->
+    <string name="Harabara">fonts/harabara_font.otf</string>
+
     <string name="app_name">LokaSee</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
