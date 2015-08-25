@@ -1,14 +1,9 @@
 package com.playing.lokasee.activites;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Window;
-import android.widget.Button;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -16,7 +11,6 @@ import com.facebook.FacebookException;
 import com.facebook.Profile;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -24,13 +18,8 @@ import com.playing.lokasee.R;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 
-import java.lang.reflect.Array;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
 import java.util.Arrays;
 
-import butterknife.Bind;
 import butterknife.OnClick;
 
 /**
@@ -56,6 +45,7 @@ public class LoginActivity extends BaseActivity {
                 Profile profile = Profile.getCurrentProfile();
                 if (profile != null) {
                     UserData.saveFacebookLogin(profile.getId(), profile.getName());
+                    UserData.saveFacebookProfPic(profile.getId(), String.valueOf(profile.getProfilePictureUri(50, 50)));
                     loginParse(profile);
                 }
             }
@@ -86,7 +76,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     private void signUpParse(Profile profile) {
-        ParseHelper.getInstance().signUp(profile.getFirstName(), profile.getLastName(), profile.getName(), profile.getId(), new ParseHelper.OnLogParseListener() {
+        ParseHelper.getInstance().signUp(profile.getFirstName(), profile.getLastName(), profile.getName(), String.valueOf(profile.getProfilePictureUri(50,50)), profile.getId(), new ParseHelper.OnLogParseListener() {
             @Override
             public void onSuccess(ParseUser parseUser) {
                 updateLocation();

@@ -37,7 +37,7 @@ public class ParseHelper {
     private ParseUser currentUser;
     private ParseObject userLocation;
 
-    public void signUp(String firstName, String lastName, String name, final String facebookId, final OnLogParseListener onLogParseListener) {
+    public void signUp(String firstName, String lastName, String name, String url_prof_pic, final String facebookId, final OnLogParseListener onLogParseListener) {
         final String username = firstName.toLowerCase() + "." + lastName.toLowerCase();
 
         final ParseUser parseUser = new ParseUser();
@@ -45,7 +45,7 @@ public class ParseHelper {
         parseUser.setPassword(facebookId);
         parseUser.put(UserDao.Properties.Facebook_id.name, facebookId);
         parseUser.put(UserDao.Properties.Name.name, name);
-
+        parseUser.put(UserDao.Properties.Url_prof_pic.name, url_prof_pic);
         parseUser.signUpInBackground(new SignUpCallback() {
             @Override
             public void done(ParseException e) {
@@ -92,6 +92,7 @@ public class ParseHelper {
                         String facebook_id = locationObject.getString(UserDao.Properties.Facebook_id.name);
                         double latitude = locationObject.getDouble(UserDao.Properties.Latitude.name);
                         double longitude = locationObject.getDouble(UserDao.Properties.Longitude.name);
+                        String url_prof_pic = locationObject.getString(UserDao.Properties.Url_prof_pic.name);
 
                         User user = new User();
                         user.setObject_id(locationObject.getObjectId());
@@ -99,7 +100,7 @@ public class ParseHelper {
                         user.setFacebook_id(facebook_id);
                         user.setLatitude(latitude);
                         user.setLongitude(longitude);
-
+                        user.setUrl_prof_pic(url_prof_pic);
                         UserRepository.save(user);
                     }
 
@@ -165,6 +166,9 @@ public class ParseHelper {
             userLocation.put(UserDao.Properties.Facebook_id.name, currentUser.get(UserDao.Properties.Facebook_id.name));
             userLocation.put(UserDao.Properties.Latitude.name, latitude);
             userLocation.put(UserDao.Properties.Longitude.name, longitude);
+
+            userLocation.put(UserDao.Properties.Url_prof_pic.name, currentUser.get(UserDao.Properties.Url_prof_pic.name));
+
 
             userLocation.saveInBackground(new SaveCallback() {
                 @Override

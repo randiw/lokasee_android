@@ -61,8 +61,9 @@ public class UserRepository {
         String name = RepoTools.getString(cursor, UserDao.Properties.Name.columnName);
         double latitude = RepoTools.getDouble(cursor, UserDao.Properties.Latitude.columnName);
         double longitude = RepoTools.getDouble(cursor, UserDao.Properties.Longitude.columnName);
+        String url_prof_pic = RepoTools.getString(cursor, UserDao.Properties.Url_prof_pic.columnName);
 
-        User user = new User(id, object_id, facebook_id, name, latitude, longitude);
+        User user = new User(id, object_id, facebook_id, name, latitude, longitude, url_prof_pic);
         return user;
     }
 

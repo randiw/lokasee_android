@@ -76,6 +76,9 @@ public class SearchActivity extends BaseActivity implements LoaderManager.Loader
     @OnItemClick(R.id.listUser)
     public void clickUser(int position) {
         User user = adapter.getItem(position);
+        Intent intent = new Intent(getApplicationContext(), SearchMapActivity.class);
+        intent.putExtra("objId", user.getObject_id());
+        startActivity(intent);
         Log.d(TAG, "Name: " + user.getName() + " objectId: " + user.getObject_id());
     }
 
@@ -88,7 +91,7 @@ public class SearchActivity extends BaseActivity implements LoaderManager.Loader
             if(textSearch == null)
                 return new CursorLoader(SearchActivity.this, UserContentProvider.CONTENT_URI, null, null, null, null);
             else {
-                String selection = UserDao.Properties.Name.columnName + " like '" + textSearch.toString() + "%'";
+                String selection = UserDao.Properties.Name.columnName + " like '%" + textSearch.toString() + "%'";
                 return new CursorLoader(SearchActivity.this, UserContentProvider.CONTENT_URI, null, selection, null, null);
             }
         }

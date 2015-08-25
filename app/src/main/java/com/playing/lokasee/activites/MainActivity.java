@@ -24,6 +24,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
+import com.playing.lokasee.UserDao;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.DataHelper;
 import com.playing.lokasee.helper.ParseHelper;
@@ -98,6 +99,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(), SearchActivity.class);
                 startActivity(i);
+
             }
         });
         // Register Event Bus to receive event
@@ -190,6 +192,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         for (User user : users) {
             LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
             if (!markers.contains(user.getObject_id())) {
+                Log.e(TAG, "User Profile " + user.getUrl_prof_pic());
                 Marker userMarker = googleMap.addMarker(new MarkerOptions()
                         .position(latLng)
                         .title(user.getName())
