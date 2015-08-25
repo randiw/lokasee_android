@@ -56,9 +56,12 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
-    @Bind(R.id.side_drawer) LinearLayout sideDrawer;
-    @Bind(R.id.search) Button searchButton;
+    @Bind(R.id.drawer_layout)
+    DrawerLayout drawerLayout;
+    @Bind(R.id.side_drawer)
+    LinearLayout sideDrawer;
+    @Bind(R.id.search)
+    Button searchButton;
 
     private MaterialMenuView materialMenu;
     private GoogleMap googleMap;
@@ -105,10 +108,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         });
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-
-
         mapFragment.getMapAsync(this);
-
 
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,8 +119,9 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
             }
         });
     }
-        // Register Event Bus to receive event
-        // from Location Alarm
+
+    // Register Event Bus to receive event
+    // from Location Alarm
     @Override
     protected void onResume() {
         super.onResume();
@@ -228,18 +229,12 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     private void setMyLocation(double latitude, double longitude, String name) {
 
-
-
         if (googleMap != null) {
             LatLng position = new LatLng(latitude, longitude);
             float zoom = 14.0f;
 
             if (myMarker == null) {
-//                myMarker = googleMap.addMarker(createMarker(mContext, position, name));
-
-
                 createMarker(mContext, position, name);
-
             } else {
                 myMarker.setPosition(position);
             }
@@ -289,13 +284,13 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         return markerOption;
     }
 
-    private MarkerOptions createMarker2(final Context mContext, final LatLng latLng, final String name, final String objId) {
+    private MarkerOptions createMarker2(final Context mContext, final LatLng latLng, final String name, String uriPhoto, final String objId) {
 
         final MarkerOptions markerOption = new MarkerOptions();
         View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker, null);
         final LinearLayout linMarker = ButterKnife.findById(marker, R.id.lin_custom_marker);
         final ImageView imgProf = ButterKnife.findById(marker, R.id.prof_img);
-        Glide.with(mContext).load("https://avatars2.githubusercontent.com/u/1239461?v=3&s=460").asBitmap().into(new BitmapImageViewTarget(imgProf) {
+        Glide.with(mContext).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
             @Override
             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                 super.onResourceReady(resource, glideAnimation);
@@ -325,14 +320,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         for (User user : users) {
             LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
             if (!markers.contains(user.getObject_id())) {
-                createMarker2(mContext, latLng, user.getName(), user.getObject_id());
-                Log.e(TAG, "User Profile " + user.getUrl_prof_pic());
-                Marker userMarker = googleMap.addMarker(new MarkerOptions()
-                        .position(latLng)
-                        .title(user.getName())
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-
-                markers.put(user.getObject_id(), userMarker);
+                createMarker2(mContext, latLng, user.getName(), user.getUrl_prof_pic(), user.getObject_id());
             } else {
                 Marker userMarker = markers.get(user.getObject_id());
                 userMarker.setPosition(latLng);
