@@ -79,6 +79,30 @@ public class ParseHelper {
         });
     }
 
+    public void updateUser(String firstName, String lastName, String name, String url_prof_pic, final String facebookId, final OnLogParseListener onLogParseListener){
+        final String username = firstName.toLowerCase() + "." + lastName.toLowerCase();
+
+        currentUser.setUsername(username);
+        currentUser.setPassword(facebookId);
+        currentUser.put(UserDao.Properties.Facebook_id.name, facebookId);
+        currentUser.put(UserDao.Properties.Name.name, name);
+        currentUser.put(UserDao.Properties.Url_prof_pic.name, url_prof_pic);
+        Log.e(TAG, "URL: " + url_prof_pic);
+        currentUser.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    UserData.saveParseResponse(currentUser.getObjectId());
+                    Log.e(TAG, "sukses masuk update");
+                    onLogParseListener.onSuccess(currentUser);
+                } else {
+                    Log.e(TAG, "update parseException " + e.getMessage());
+                    onLogParseListener.onError(e);
+                }
+            }
+        });
+    }
+
     public void getAllUser(final OnParseQueryListener onParseQueryListener) {
         ParseQuery<ParseObject> locationQuery = new ParseQuery<ParseObject>(LOCATION);
         locationQuery.whereNotEqualTo(UserDao.Properties.Facebook_id.name, UserData.getFacebookId());
@@ -180,6 +204,9 @@ public class ParseHelper {
                 }
             });
         }
+    }
+
+    public void updateUser(String firstName, String lastName, String s, String id, OnLogParseListener onLogParseListener) {
     }
 
     public abstract interface OnParseListener {

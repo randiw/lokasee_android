@@ -74,7 +74,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     private void signUpParse(Profile profile) {
-        ParseHelper.getInstance().signUp(profile.getFirstName(), profile.getLastName(), profile.getName(), String.valueOf(profile.getProfilePictureUri(50,50)), profile.getId(), new ParseHelper.OnLogParseListener() {
+        ParseHelper.getInstance().signUp(profile.getFirstName(), profile.getLastName(), profile.getName(), String.valueOf(profile.getProfilePictureUri(50, 50)), profile.getId(), new ParseHelper.OnLogParseListener() {
             @Override
             public void onSuccess(ParseUser parseUser) {
                 updateLocation();
@@ -91,12 +91,29 @@ public class LoginActivity extends BaseActivity {
         ParseHelper.getInstance().login(profile.getFirstName(), profile.getLastName(), profile.getId(), new ParseHelper.OnLogParseListener() {
             @Override
             public void onSuccess(ParseUser parseUser) {
+                updateParse(profile);
+                Log.e(TAG, String.valueOf(profile.getProfilePictureUri(50, 50)));
                 updateLocation();
             }
 
             @Override
             public void onError(ParseException pe) {
                 signUpParse(profile);
+            }
+        });
+    }
+
+    public static void updateParse(Profile profile) {
+        ParseHelper.getInstance().updateUser(profile.getFirstName(), profile.getLastName(), profile.getName(), String.valueOf(profile.getProfilePictureUri(50,50)), profile.getId(), new ParseHelper.OnLogParseListener(){
+
+            @Override
+            public void onError(ParseException pe) {
+                Log.e(TAG, "update parse: gagal");
+            }
+
+            @Override
+            public void onSuccess(ParseUser parseUser) {
+                Log.e(TAG, "SUKSES UPDATE parse");
             }
         });
     }

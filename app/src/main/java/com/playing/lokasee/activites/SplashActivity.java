@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.facebook.AccessToken;
+import com.facebook.Profile;
 import com.norbsoft.typefacehelper.TypefaceHelper;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -103,6 +104,7 @@ public class SplashActivity extends BaseActivity {
         if (isFinishCountDown) {
             Intent intent;
             if (ParseUser.getCurrentUser() != null && AccessToken.getCurrentAccessToken() != null) {
+
                 intent = new Intent(getApplicationContext(), MainActivity.class);
             } else {
                 intent = new Intent(getApplicationContext(), LoginActivity.class);
