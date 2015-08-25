@@ -10,6 +10,7 @@ import com.parse.Parse;
 import com.playing.lokasee.activites.MainActivity;
 import com.playing.lokasee.activites.SplashActivity;
 import com.playing.lokasee.helper.DataHelper;
+import com.playing.lokasee.helper.TypeFaceHelper;
 
 /**
  * Created by mexan on 8/18/15.
@@ -31,6 +32,8 @@ public class LokaseeApplication extends Application {
         setupParse();
 
         setupDatabase();
+
+        TypeFaceHelper.initFace(this);
 
     }
 

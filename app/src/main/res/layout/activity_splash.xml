@@ -15,7 +15,8 @@
             android:layout_gravity="center"
             android:src="@drawable/ic_lokasee" />
 
-        <com.playing.lokasee.views.HarabaraTextView
+        <TextView
+            android:id="@+id/txt_icon_lokasee"
             android:layout_width="wrap_content"
             android:text="lokasee"
             android:textStyle="bold"
