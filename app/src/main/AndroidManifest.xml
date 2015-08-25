@@ -43,7 +43,6 @@
         <activity android:name=".activites.LoginActivity" />
         <activity android:name=".activites.MainActivity" />
         <activity android:name=".activites.SearchActivity"/>
-        <activity android:name=".activites.SearchMapActivity"/>
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
