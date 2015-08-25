@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.view.LayoutInflater;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -24,13 +25,11 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
-import com.playing.lokasee.UserDao;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.DataHelper;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 import com.playing.lokasee.models.EventBusLocation;
-import com.playing.lokasee.receiver.LocationAlarm;
 import com.playing.lokasee.repositories.UserRepository;
 import com.squareup.otto.Subscribe;
 
@@ -50,7 +49,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     private TextView title;
     private MaterialMenuView materialMenu;
-
     private GoogleMap googleMap;
     private Marker myMarker;
     private Hashtable<String, Marker> markers;
@@ -105,6 +103,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         // Register Event Bus to receive event
         // from Location Alarm
         BusProvider.getInstance().register(this);
+
+
     }
 
     @Override
@@ -124,10 +124,26 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
         materialMenu = ButterKnife.findById(actionbar, R.id.menuIcon);
         materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
-        materialMenu.setOnClickListener(this);
 
+
+        ImageButton imgRefresh = ButterKnife.findById(actionbar, R.id.action_refresh);
+        imgRefresh.setOnClickListener(lsRefresh);
+
+        materialMenu.setOnClickListener(this);
         return actionbar;
     }
+
+    View.OnClickListener lsRefresh = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (googleMap != null && markers != null) {
+                Log.i(TAG, "Clear Map");
+                retrieveMarkers();
+                setMyLocation(lat, lon, DataHelper.getString("name"));
+            }
+        }
+    };
+
 
     @Override
     public void onClick(View v) {
@@ -136,6 +152,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         } else {
             drawerLayout.openDrawer(sideDrawer);
         }
+
     }
 
     @Override

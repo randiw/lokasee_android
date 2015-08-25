@@ -5,16 +5,20 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.facebook.AccessToken;
+import com.norbsoft.typefacehelper.TypefaceHelper;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.playing.lokasee.R;
 import com.playing.lokasee.helper.LocationManager;
 import com.playing.lokasee.helper.ParseHelper;
+import com.playing.lokasee.helper.TypeFaceHelper;
 import com.playing.lokasee.helper.UserData;
 
+import butterknife.Bind;
 import rx.functions.Action1;
 
 /**
@@ -24,14 +28,21 @@ public class SplashActivity extends BaseActivity {
 
     private static final int SPLASH_TIME = 3000;
     private static final int SPLASH_INTERVAL = 500;
-    private static final String tag = SplashActivity.class.getSimpleName();
+    private static final  String TAG =  SplashActivity.class.getSimpleName();
+
     private boolean isFinishCountDown;
+
+    @Bind(R.id.txt_icon_lokasee)
+    TextView txtTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setFullScreen();
         setupLayout(R.layout.activity_splash);
+
+        // Set type face
+        TypefaceHelper.typeface(txtTitle, TypeFaceHelper.getHarbaraFace());
     }
 
     @Override
@@ -57,9 +68,12 @@ public class SplashActivity extends BaseActivity {
         LocationManager.checkLocation(getApplicationContext()).subscribe(new Action1<Location>() {
             @Override
             public void call(Location location) {
+
                 if (location != null) {
                     double lat = location.getLatitude();
                     double lon = location.getLongitude();
+
+
 
                     UserData.saveLocation(Double.toString(lat), Double.toString(lon));
                     if (ParseUser.getCurrentUser() != null) {
@@ -75,6 +89,9 @@ public class SplashActivity extends BaseActivity {
                             }
                         });
                     }
+                }else{
+                    Log.i(TAG, "location null");
+
                 }
             }
         }, new Action1<Throwable>() {
