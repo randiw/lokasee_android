@@ -29,7 +29,7 @@ public class LoginActivity extends BaseActivity {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 
-    private  CallbackManager callbackManager;
+    private CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,11 +58,9 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onError(FacebookException e) {
                 Log.e(TAG, "facebookException: " + e.getMessage());
-
             }
         });
     }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -71,7 +69,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     @OnClick(R.id.btn_fb_login)
-    public void loginFb(){
+    public void loginFb() {
         LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("public_profile"));
     }
 

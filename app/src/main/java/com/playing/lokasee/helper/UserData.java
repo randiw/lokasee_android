@@ -47,6 +47,11 @@ public class UserData {
         return facebookId;
     }
 
+    public static String getName() {
+        String name = DataHelper.getString(NAME);
+        return name;
+    }
+
     public static String getUsername() {
         String username = DataHelper.getString(USERNAME);
         return username;

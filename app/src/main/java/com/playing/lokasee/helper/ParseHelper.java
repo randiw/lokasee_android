@@ -159,8 +159,6 @@ public class ParseHelper {
                 }
             });
         } else {
-            Log.e(TAG, "Size of user dao: " + String.valueOf(UserRepository.isDataExist()));
-
             userLocation.put(UserDao.TABLENAME.toLowerCase(), currentUser);
             userLocation.put(UserDao.Properties.Name.name, currentUser.get(UserDao.Properties.Name.name));
             userLocation.put(UserDao.Properties.Facebook_id.name, currentUser.get(UserDao.Properties.Facebook_id.name));

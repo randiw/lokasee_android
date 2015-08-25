@@ -1,17 +1,16 @@
 package com.playing.lokasee;
 
-import android.app.Activity;
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Bundle;
 
+import com.crashlytics.android.Crashlytics;
 import com.facebook.FacebookSdk;
+import com.github.johnkil.print.PrintConfig;
 import com.parse.Parse;
-import com.playing.lokasee.activites.MainActivity;
-import com.playing.lokasee.activites.SplashActivity;
 import com.playing.lokasee.helper.DataHelper;
 import com.playing.lokasee.view.adapter.UserContentProvider;
-import com.playing.lokasee.helper.TypeFaceHelper;
+import com.playing.lokasee.helper.FontLibHelper;
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by mexan on 8/18/15.
@@ -25,17 +24,18 @@ public class LokaseeApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         instance = this;
 
         DataHelper.init(instance);
 
+        PrintConfig.initDefault(getAssets(), "fonts/material-icon-font.ttf");
         FacebookSdk.sdkInitialize(getApplicationContext());
         setupParse();
 
         setupDatabase();
 
-        TypeFaceHelper.initFace(this);
-
+        FontLibHelper.initFace(this);
     }
 
     public static synchronized LokaseeApplication getInstance() {
@@ -60,6 +60,4 @@ public class LokaseeApplication extends Application {
     public DaoSession getDaoSession() {
         return daoSession;
     }
-
-
 }
