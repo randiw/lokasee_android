@@ -99,6 +99,7 @@ public class SplashActivity extends BaseActivity {
     }
 
     private void finishSplash() {
+//        if (isFinishCountDown || isLocationRetrieved) {
         if (isFinishCountDown) {
             Intent intent;
             if (ParseUser.getCurrentUser() != null && AccessToken.getCurrentAccessToken() != null) {

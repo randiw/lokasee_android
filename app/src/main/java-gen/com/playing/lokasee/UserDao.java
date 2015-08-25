@@ -29,6 +29,7 @@ public class UserDao extends AbstractDao<User, Long> {
         public final static Property Name = new Property(3, String.class, "name", false, "NAME");
         public final static Property Latitude = new Property(4, Double.class, "latitude", false, "LATITUDE");
         public final static Property Longitude = new Property(5, Double.class, "longitude", false, "LONGITUDE");
+        public final static Property Url_prof_pic = new Property(6, String.class, "url_prof_pic", false, "URL_PROF_PIC");
     };
 
 
@@ -49,7 +50,8 @@ public class UserDao extends AbstractDao<User, Long> {
                 "'FACEBOOK_ID' TEXT," + // 2: facebook_id
                 "'NAME' TEXT," + // 3: name
                 "'LATITUDE' REAL," + // 4: latitude
-                "'LONGITUDE' REAL);"); // 5: longitude
+                "'LONGITUDE' REAL," + // 5: longitude
+                "'URL_PROF_PIC' TEXT);"); // 6: url_prof_pic
     }
 
     /** Drops the underlying database table. */
@@ -92,6 +94,11 @@ public class UserDao extends AbstractDao<User, Long> {
         if (longitude != null) {
             stmt.bindDouble(6, longitude);
         }
+ 
+        String url_prof_pic = entity.getUrl_prof_pic();
+        if (url_prof_pic != null) {
+            stmt.bindString(7, url_prof_pic);
+        }
     }
 
     /** @inheritdoc */
@@ -109,7 +116,8 @@ public class UserDao extends AbstractDao<User, Long> {
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // facebook_id
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // name
             cursor.isNull(offset + 4) ? null : cursor.getDouble(offset + 4), // latitude
-            cursor.isNull(offset + 5) ? null : cursor.getDouble(offset + 5) // longitude
+            cursor.isNull(offset + 5) ? null : cursor.getDouble(offset + 5), // longitude
+            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6) // url_prof_pic
         );
         return entity;
     }
@@ -123,6 +131,7 @@ public class UserDao extends AbstractDao<User, Long> {
         entity.setName(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setLatitude(cursor.isNull(offset + 4) ? null : cursor.getDouble(offset + 4));
         entity.setLongitude(cursor.isNull(offset + 5) ? null : cursor.getDouble(offset + 5));
+        entity.setUrl_prof_pic(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
      }
     
     /** @inheritdoc */

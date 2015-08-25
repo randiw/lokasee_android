@@ -45,6 +45,7 @@ public class LoginActivity extends BaseActivity {
                 Profile profile = Profile.getCurrentProfile();
                 if (profile != null) {
                     UserData.saveFacebookLogin(profile.getId(), profile.getName());
+                    UserData.saveFacebookProfPic(profile.getId(), String.valueOf(profile.getProfilePictureUri(50, 50)));
                     loginParse(profile);
                 }
             }
@@ -73,7 +74,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     private void signUpParse(Profile profile) {
-        ParseHelper.getInstance().signUp(profile.getFirstName(), profile.getLastName(), profile.getName(), profile.getId(), new ParseHelper.OnLogParseListener() {
+        ParseHelper.getInstance().signUp(profile.getFirstName(), profile.getLastName(), profile.getName(), String.valueOf(profile.getProfilePictureUri(50,50)), profile.getId(), new ParseHelper.OnLogParseListener() {
             @Override
             public void onSuccess(ParseUser parseUser) {
                 updateLocation();
