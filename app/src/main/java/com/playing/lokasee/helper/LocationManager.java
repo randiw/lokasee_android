@@ -14,7 +14,7 @@ import rx.Observable;
 public class LocationManager {
 
     private static final int NUM_UPDATES_INTERVAL = 5;
-    private static final int INTERVAL = 1000;
+    private static final int INTERVAL = 100;
 
     public static Observable<Location> checkLocation(Context mContext) {
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(mContext);
