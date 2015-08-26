@@ -1,5 +1,7 @@
 package com.playing.lokasee.activites;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -9,7 +11,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.balysv.materialmenu.MaterialMenuView;
@@ -47,7 +51,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
     @Bind(R.id.side_drawer) LinearLayout sideDrawer;
-    @Bind(R.id.search) Button searchButton;
 
     private MaterialMenuView materialMenu;
     private GoogleMap googleMap;
@@ -55,6 +58,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
     private Hashtable<String, Marker> markers;
     private double lat;
     private double lon;
+    TextView title;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,15 +97,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), SearchActivity.class);
-                startActivityForResult(i, 1);
-
-            }
-        });
     }
         // Register Event Bus to receive event
         // from Location Alarm
@@ -121,15 +116,19 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
     protected View createActionBar(LayoutInflater inflater) {
         View actionbar = inflater.inflate(R.layout.actionbar, null);
 
-        TextView title = ButterKnife.findById(actionbar, R.id.title);
+        title = ButterKnife.findById(actionbar, R.id.title);
         title.setText(R.string.app_name);
 
         materialMenu = ButterKnife.findById(actionbar, R.id.menuIcon);
         materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
         materialMenu.setOnClickListener(this);
 
-        PrintView imgRefresh = ButterKnife.findById(actionbar, R.id.action_refresh);
-        imgRefresh.setOnClickListener(this);
+//        PrintView imgSearch = ButterKnife.findById(actionbar, R.id.action_search);
+//        imgSearch.setOnClickListener(this);
+
+//        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = ButterKnife.findById(actionbar, R.id.action_testsearch);
+        searchView.setOnClickListener(this);
 
         return actionbar;
     }
@@ -137,20 +136,27 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.action_refresh:
-                if (googleMap != null && markers != null) {
-                    Log.i(TAG, "Clear Map");
-                    retrieveMarkers();
-                    setMyLocation(lat, lon, DataHelper.getString("name"));
-                }
-                break;
-
             case R.id.menuIcon:
                 if (drawerLayout.isDrawerOpen(sideDrawer)) {
                     drawerLayout.closeDrawer(sideDrawer);
                 } else {
                     drawerLayout.openDrawer(sideDrawer);
                 }
+                break;
+//
+//            case R.id.action_search:
+////                Intent i = new Intent(getApplicationContext(), SearchActivity.class);
+////                startActivityForResult(i, 1);
+//                Toast.makeText(getApplicationContext(), "search", Toast.LENGTH_SHORT).show();
+//                break;
+            case R.id.action_testsearch:
+                if(title.getVisibility() == View.VISIBLE) {
+                    title.setVisibility(View.GONE);
+                    Log.e(TAG, "TES");
+                }
+//                Intent i = new Intent(getApplicationContext(), SearchActivity.class);
+//                startActivityForResult(i, 1);
+//                Toast.makeText(getApplicationContext(), "test search", Toast.LENGTH_SHORT).show();
                 break;
         }
     }
@@ -199,6 +205,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     private void updateMarker() {
         List<User> users = UserRepository.getAll();
+        Log.e(TAG, "users size: " + users.size());
         if (users == null) {
             return;
         }

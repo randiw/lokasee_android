@@ -11,9 +11,12 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.TextView;
 
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
@@ -29,7 +32,7 @@ import butterknife.OnItemClick;
 /**
  * Created by nabilla on 8/19/15.
  */
-public class SearchActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class SearchActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>, View.OnClickListener {
 
     private static final String TAG = SearchActivity.class.getSimpleName();
     private static final int LIST_ID = 42;
@@ -111,5 +114,20 @@ public class SearchActivity extends BaseActivity implements LoaderManager.Loader
             adapter.swapCursor(null);
             adapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+
+    }
+
+    @Override
+    protected View createActionBar(LayoutInflater inflater){
+        View actionBar = inflater.inflate(R.layout.actionbar_title, null);
+
+        TextView title = ButterKnife.findById(actionBar, R.id.title);
+        title.setText("LokaSee");
+
+        return actionBar;
     }
 }

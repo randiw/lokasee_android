@@ -7,13 +7,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
 import com.playing.lokasee.UserDao;
 import com.playing.lokasee.repositories.UserRepository;
 import com.playing.lokasee.tools.RepoTools;
+import com.playing.lokasee.tools.RoundImage;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -62,13 +65,16 @@ public class UserCursorAdapter extends CursorAdapter {
         ViewHolder holder = (ViewHolder) view.getTag();
 
         String name = RepoTools.getString(cursor, UserDao.Properties.Name.columnName);
+        String profpic = RepoTools.getString(cursor, UserDao.Properties.Url_prof_pic.columnName);
         Log.e(tag, name);
         holder.user.setText(name);
+        Glide.with(context).load(profpic).transform(new RoundImage(context)).into(holder.imageUser);
     }
 
     static class ViewHolder {
 
         @Bind(R.id.user) TextView user;
+        @Bind(R.id.imageUser) ImageView imageUser;
 
         public ViewHolder(View view) {
             ButterKnife.bind(this, view);
