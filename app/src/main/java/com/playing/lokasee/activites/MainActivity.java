@@ -39,7 +39,6 @@ import com.playing.lokasee.User;
 import com.playing.lokasee.events.UpdateLocationEvent;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.DataHelper;
-import com.playing.lokasee.helper.LocationManager;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 import com.playing.lokasee.repositories.UserRepository;
@@ -50,7 +49,6 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import rx.functions.Action1;
 
 public class MainActivity extends BaseActivity implements OnMapReadyCallback, View.OnClickListener {
 
@@ -71,6 +69,13 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
     private double lon;
     private Context mContext;
 
+    // View for custom Marker
+    private View marker;
+    private LinearLayout linMarker;
+    private ImageView imgProf;
+    private MarkerOptions markerOptions;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,61 +83,15 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
         mContext = this;
 
-        drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-            @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
-                materialMenu.setTransformationOffset(MaterialMenuDrawable.AnimationState.BURGER_ARROW, drawerLayout.isDrawerOpen(sideDrawer) ? 2 - slideOffset : slideOffset);
-            }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-            }
-
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-            }
-
-            @Override
-            public void onDrawerStateChanged(int newState) {
-                if (newState == DrawerLayout.STATE_IDLE) {
-                    if (drawerLayout.isDrawerOpen(sideDrawer)) {
-                        materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
-                    } else {
-                        materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
-                    }
-                }
-                super.onDrawerStateChanged(newState);
-            }
-        });
+        drawerLayout.setDrawerListener(lsDrawerListener);
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), SearchActivity.class);
-                startActivity(i);
+        searchButton.setOnClickListener(lsSearch);
 
-            }
-        });
     }
 
-    // Register Event Bus to receive event
-    // from Location Alarm
-    @Override
-    protected void onResume() {
-        super.onResume();
-        BusProvider.getInstance().register(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        BusProvider.getInstance().unregister(this);
-    }
 
     @Override
     protected View createActionBar(LayoutInflater inflater) {
@@ -146,54 +105,188 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         materialMenu.setOnClickListener(this);
 
         PrintView imgRefresh = ButterKnife.findById(actionbar, R.id.action_refresh);
+
         imgRefresh.setOnClickListener(this);
+
 
         return actionbar;
     }
 
-    View.OnClickListener lsRefresh = new View.OnClickListener() {
+    private void setUpMarker() {
+        markerOptions = new MarkerOptions();
+        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker, null);
+        linMarker = ButterKnife.findById(marker, R.id.lin_custom_marker);
+        imgProf = ButterKnife.findById(marker, R.id.prof_img);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        this.googleMap = googleMap;
+
+        setUpMarker();
+
+        lat = Double.parseDouble(UserData.getLatitude());
+        lon = Double.parseDouble(UserData.getLongitude());
+
+        setMyLocation(lat, lon, UserData.getName());
+        retrieveMarkers();
+    }
+
+    private void setMyLocation(double latitude, double longitude, String name) {
+
+        if (googleMap != null) {
+            LatLng position = new LatLng(latitude, longitude);
+            float zoom = 14.0f;
+
+            if (myMarker == null) {
+
+                createMarker(mContext, position, name, null, DataHelper.getString(UserData.URL_PROF_PIC));
+
+            } else {
+                myMarker.setPosition(position);
+            }
+
+            if (googleMap.getCameraPosition().zoom < zoom) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, zoom));
+            } else {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(googleMap.getCameraPosition().target, googleMap.getCameraPosition().zoom));
+            }
+
+            Log.i(TAG, "Zoom Level" + googleMap.getCameraPosition().zoom);
+        }
+    }
+
+    private void retrieveMarkers() {
+        ParseHelper.getInstance().getAllUser(new ParseHelper.OnParseQueryListener() {
+            @Override
+            public void onParseQuery(List<ParseObject> parseObjectList) {
+                updateMarker();
+            }
+
+            @Override
+            public void onError(ParseException pe) {
+
+            }
+        });
+    }
+
+    private void createMarker(final Context mContext, final LatLng latLng, final String name, final String objId, final String uriPhoto) {
+
+        Glide.with(mContext).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
+            @Override
+            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                super.onResourceReady(resource, glideAnimation);
+                imgProf.setImageBitmap(resource);
+
+                // if image already downloaded then draw marker using custom view
+                markerOptions.position(latLng).title(name).icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(linMarker, mContext)));
+
+                if (objId == null) {
+                    myMarker = googleMap.addMarker(markerOptions);
+                } else {
+                    Marker userMarker = googleMap.addMarker(markerOptions);
+                    markers.put(objId, userMarker);
+                }
+
+            }
+        });
+    }
+
+
+    private void updateMarker() {
+        List<User> users = UserRepository.getAll();
+        if (users == null) {
+            return;
+        }
+
+        if (markers == null) {
+            markers = new Hashtable<>();
+        }
+        for (User user : users) {
+            LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
+            if (!markers.contains(user.getObject_id())) {
+
+                createMarker(mContext, latLng, user.getName(), user.getObject_id(), user.getUrl_prof_pic());
+
+            } else {
+                Marker userMarker = markers.get(user.getObject_id());
+                userMarker.setPosition(latLng);
+            }
+        }
+    }
+
+    public static Bitmap getBitmapFromView(View view, Context mContext) {
+
+        // Create display metric
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+        // Set LayoutParams (Height and Width) from view
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.buildDrawingCache();
+
+        // Concert bitmap from view
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+
+        return bitmap;
+    }
+
+    @Subscribe
+    public void onUpdateLocation(UpdateLocationEvent updateLocationEvent) {
+        Log.i(TAG, updateLocationEvent.toString());
+        if (updateLocationEvent.location != null) {
+            if (googleMap != null && markers != null) {
+                Location location = updateLocationEvent.location;
+                retrieveMarkers();
+                lat = location.getLatitude();
+                lon = location.getLongitude();
+                setMyLocation(lat, lon, null);
+            }
+        }
+    }
+
+    /* #  LISTENER FUNCTION # */
+
+    View.OnClickListener lsSearch = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (googleMap != null && markers != null) {
-
-                LocationManager.checkLocation(mContext).subscribe(new Action1<Location>() {
-                    @Override
-                    public void call(Location location) {
-
-                        Log.i(TAG, "latitude" + location.getLatitude());
-                        Log.i(TAG, "longitude" + location.getLongitude());
-
-                        setMyLocation(location.getLatitude(), location.getLongitude(), DataHelper.getString("name"));
-                        retrieveMarkers();
-
-                        ParseHelper.getInstance().saveMyLocation(location.getLatitude(), location.getLongitude(), new ParseHelper.OnSaveParseObjectListener() {
-                            @Override
-                            public void onSaveParseObject(ParseObject parseObject) {
-
-                            }
-
-                            @Override
-                            public void onError(ParseException pe) {
-
-                            }
-                        });
-
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-
-                        throwable.printStackTrace();
-
-                        Log.i(TAG, "Error");
-
-
-                    }
-                });
-            }
+            Intent i = new Intent(getApplicationContext(), SearchActivity.class);
+            startActivity(i);
         }
     };
 
+    DrawerLayout.SimpleDrawerListener lsDrawerListener = new DrawerLayout.SimpleDrawerListener() {
+        @Override
+        public void onDrawerSlide(View drawerView, float slideOffset) {
+            materialMenu.setTransformationOffset(MaterialMenuDrawable.AnimationState.BURGER_ARROW, drawerLayout.isDrawerOpen(sideDrawer) ? 2 - slideOffset : slideOffset);
+        }
+
+        @Override
+        public void onDrawerOpened(View drawerView) {
+            super.onDrawerOpened(drawerView);
+        }
+
+        @Override
+        public void onDrawerClosed(View drawerView) {
+            super.onDrawerClosed(drawerView);
+        }
+
+        @Override
+        public void onDrawerStateChanged(int newState) {
+            if (newState == DrawerLayout.STATE_IDLE) {
+                if (drawerLayout.isDrawerOpen(sideDrawer)) {
+                    materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
+                } else {
+                    materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
+                }
+            }
+            super.onDrawerStateChanged(newState);
+        }
+    };
 
     @Override
     public void onClick(View v) {
@@ -216,144 +309,23 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         }
     }
 
+
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        this.googleMap = googleMap;
-
-        lat = Double.parseDouble(UserData.getLatitude());
-        lon = Double.parseDouble(UserData.getLongitude());
-
-        setMyLocation(lat, lon, UserData.getName());
-        retrieveMarkers();
+    protected void onResume() {
+        super.onResume();
+        BusProvider.getInstance().register(this);
     }
 
-    private void setMyLocation(double latitude, double longitude, String name) {
-
-        if (googleMap != null) {
-            LatLng position = new LatLng(latitude, longitude);
-            float zoom = 14.0f;
-
-            if (myMarker == null) {
-                createMarker(mContext, position, name);
-            } else {
-                myMarker.setPosition(position);
-            }
-
-            if (googleMap.getCameraPosition().zoom < zoom) {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, zoom));
-            } else {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, googleMap.getCameraPosition().zoom));
-            }
-
-        }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        BusProvider.getInstance().unregister(this);
     }
 
-    private void retrieveMarkers() {
-        ParseHelper.getInstance().getAllUser(new ParseHelper.OnParseQueryListener() {
-            @Override
-            public void onParseQuery(List<ParseObject> parseObjectList) {
-                updateMarker();
-            }
+    @Override
+    protected void onStop() {
+        super.onStop();
 
-            @Override
-            public void onError(ParseException pe) {
-
-            }
-        });
-    }
-
-    private MarkerOptions createMarker(final Context mContext, final LatLng latLng, final String name) {
-
-        final MarkerOptions markerOption = new MarkerOptions();
-
-        View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker, null);
-        final LinearLayout linMarker = ButterKnife.findById(marker, R.id.lin_custom_marker);
-        final ImageView imgProf = ButterKnife.findById(marker, R.id.prof_img);
-        Glide.with(mContext).load("https://avatars2.githubusercontent.com/u/1239461?v=3&s=460").asBitmap().into(new BitmapImageViewTarget(imgProf) {
-            @Override
-            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                super.onResourceReady(resource, glideAnimation);
-                imgProf.setImageBitmap(resource);
-                markerOption.position(latLng).title(name).icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(linMarker, mContext)));
-
-                myMarker = googleMap.addMarker(markerOption);
-
-            }
-        });
-
-        return markerOption;
-    }
-
-    private MarkerOptions createMarker2(final Context mContext, final LatLng latLng, final String name, String uriPhoto, final String objId) {
-
-        final MarkerOptions markerOption = new MarkerOptions();
-        View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker, null);
-        final LinearLayout linMarker = ButterKnife.findById(marker, R.id.lin_custom_marker);
-        final ImageView imgProf = ButterKnife.findById(marker, R.id.prof_img);
-        Glide.with(mContext).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
-            @Override
-            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                super.onResourceReady(resource, glideAnimation);
-                imgProf.setImageBitmap(resource);
-                markerOption.position(latLng).title(name).icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(linMarker, mContext)));
-
-                Marker userMarker = googleMap.addMarker(markerOption);
-
-                markers.put(objId, userMarker);
-
-
-            }
-        });
-
-        return markerOption;
-    }
-
-    private void updateMarker() {
-        List<User> users = UserRepository.getAll();
-        if (users == null) {
-            return;
-        }
-
-        if (markers == null) {
-            markers = new Hashtable<>();
-        }
-        for (User user : users) {
-            LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
-            if (!markers.contains(user.getObject_id())) {
-                createMarker2(mContext, latLng, user.getName(), user.getUrl_prof_pic(), user.getObject_id());
-            } else {
-                Marker userMarker = markers.get(user.getObject_id());
-                userMarker.setPosition(latLng);
-            }
-        }
-    }
-
-    public static Bitmap getBitmapFromView(View view, Context mContext) {
-        // Convert a view to bitmap
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
-        view.buildDrawingCache();
-        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-
-        Canvas canvas = new Canvas(bitmap);
-        view.draw(canvas);
-
-        return bitmap;
-    }
-
-    @Subscribe
-    public void onUpdateLocation(UpdateLocationEvent updateLocationEvent) {
-        Log.i(TAG, updateLocationEvent.toString());
-        if (updateLocationEvent.location != null) {
-            if (googleMap != null && markers != null) {
-                Location location = updateLocationEvent.location;
-                retrieveMarkers();
-                setMyLocation(location.getLatitude(), location.getLongitude(), null);
-            }
-        }
     }
 
 
