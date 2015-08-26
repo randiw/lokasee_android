@@ -73,10 +73,6 @@ public class SplashActivity extends BaseActivity {
                     double lat = location.getLatitude();
                     double lon = location.getLongitude();
 
-                    System.out.println("Latitude" + lat);
-                    System.out.println("Longitude" + lon);
-
-
                     UserData.saveLocation(Double.toString(lat), Double.toString(lon));
                     if (ParseUser.getCurrentUser() != null) {
                         ParseHelper.getInstance().saveMyLocation(lat, lon, new ParseHelper.OnSaveParseObjectListener() {

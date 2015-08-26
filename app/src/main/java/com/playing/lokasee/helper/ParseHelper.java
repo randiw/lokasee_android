@@ -87,13 +87,11 @@ public class ParseHelper {
         currentUser.put(UserDao.Properties.Facebook_id.name, facebookId);
         currentUser.put(UserDao.Properties.Name.name, name);
         currentUser.put(UserDao.Properties.Url_prof_pic.name, url_prof_pic);
-        Log.e(TAG, "URL: " + url_prof_pic);
         currentUser.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 if (e == null) {
                     UserData.saveParseResponse(currentUser.getObjectId());
-                    Log.e(TAG, "sukses masuk update");
                     onLogParseListener.onSuccess(currentUser);
                 } else {
                     Log.e(TAG, "update parseException " + e.getMessage());
@@ -138,8 +136,6 @@ public class ParseHelper {
     }
 
     public void retrieveMyLocation(String facebookId, final OnParseQueryListener onParseQueryListener) {
-        Log.d(TAG, "retrieveMyLocation");
-
         ParseQuery<ParseObject> locationQuery = new ParseQuery<ParseObject>(LOCATION);
         locationQuery.whereEqualTo(UserDao.Properties.Facebook_id.name, facebookId);
         locationQuery.findInBackground(new FindCallback<ParseObject>() {
@@ -163,13 +159,11 @@ public class ParseHelper {
     }
 
     public void saveMyLocation(final double latitude, final double longitude, final OnSaveParseObjectListener onSaveParseObjectListener) {
-        Log.d(TAG, "saveMyLocation");
         if(currentUser == null) {
             currentUser = ParseUser.getCurrentUser();
         }
 
         if(userLocation == null) {
-            Log.d(TAG, "userLocation null");
             retrieveMyLocation(UserData.getFacebookId(), new OnParseQueryListener() {
                 @Override
                 public void onParseQuery(List<ParseObject> parseObjectList) {
@@ -188,9 +182,7 @@ public class ParseHelper {
             userLocation.put(UserDao.Properties.Facebook_id.name, currentUser.get(UserDao.Properties.Facebook_id.name));
             userLocation.put(UserDao.Properties.Latitude.name, latitude);
             userLocation.put(UserDao.Properties.Longitude.name, longitude);
-
             userLocation.put(UserDao.Properties.Url_prof_pic.name, currentUser.get(UserDao.Properties.Url_prof_pic.name));
-
 
             userLocation.saveInBackground(new SaveCallback() {
                 @Override

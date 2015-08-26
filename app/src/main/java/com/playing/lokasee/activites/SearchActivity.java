@@ -5,13 +5,10 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -21,9 +18,7 @@ import com.playing.lokasee.UserDao;
 import com.playing.lokasee.view.adapter.UserContentProvider;
 import com.playing.lokasee.view.adapter.UserCursorAdapter;
 
-import com.playing.lokasee.DaoMaster;
 import butterknife.Bind;
-import butterknife.ButterKnife;
 import butterknife.OnItemClick;
 
 /**
@@ -36,19 +31,17 @@ public class SearchActivity extends BaseActivity implements LoaderManager.Loader
 
     @Bind(R.id.listUser) ListView listviewUser;
     @Bind(R.id.searchEdit) EditText searchEdit;
-    UserCursorAdapter adapter;
-    String textSearch;
+
+    private UserCursorAdapter adapter;
+    private String textSearch;
 
     @Override
     protected void onCreate(Bundle saveInstanceState) {
         super.onCreate(saveInstanceState);
-        setContentView(R.layout.activity_search);
-        ButterKnife.bind(this);
+        setupLayout(R.layout.activity_search);
 
         adapter = new UserCursorAdapter(getApplicationContext());
         listviewUser.setAdapter(adapter);
-
-        getLoaderManager().initLoader(LIST_ID, null, this);
 
         searchEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -57,12 +50,9 @@ public class SearchActivity extends BaseActivity implements LoaderManager.Loader
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(TextUtils.isEmpty(s)){
-                    textSearch = null;
-                }else{
-                    textSearch = s.toString();
-                }
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                String searchFilter = !TextUtils.isEmpty(charSequence) ? charSequence.toString() : null;
+                textSearch = searchFilter;
                 getLoaderManager().restartLoader(LIST_ID, null, SearchActivity.this);
             }
 
@@ -71,30 +61,33 @@ public class SearchActivity extends BaseActivity implements LoaderManager.Loader
 
             }
         });
+
+        getLoaderManager().initLoader(LIST_ID, null, this);
     }
 
     @OnItemClick(R.id.listUser)
     public void clickUser(int position) {
         User user = adapter.getItem(position);
+
         Intent intent = new Intent();
-        intent.putExtra("objId", user.getObject_id());
+        intent.putExtra(UserDao.Properties.Object_id.name, user.getObject_id());
+
         setResult(RESULT_OK, intent);
         finish();
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
-        if (LIST_ID != id) {
-            return null;
-        } else {
-            if(textSearch == null)
-                return new CursorLoader(SearchActivity.this, UserContentProvider.CONTENT_URI, null, null, null, null);
-            else {
-                String selection = UserDao.Properties.Name.columnName + " like '%" + textSearch.toString() + "%'";
-                return new CursorLoader(SearchActivity.this, UserContentProvider.CONTENT_URI, null, selection, null, null);
+        if (LIST_ID == id) {
+            String selection = null;
+            if (textSearch != null) {
+                selection = UserDao.Properties.Name.columnName + " like '%" + textSearch.toString() + "%'";
             }
+
+            return new CursorLoader(SearchActivity.this, UserContentProvider.CONTENT_URI, null, selection, null, null);
         }
+
+        return null;
     }
 
     @Override
