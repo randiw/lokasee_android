@@ -104,22 +104,11 @@ public class SplashActivity extends BaseActivity {
         });
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        LocationManager.checkLocation(this).unsubscribeOn(new Scheduler() {
-            @Override
-            public Worker createWorker() {
-                return null;
-            }
-        });
-    }
-
     private void finishSplash() {
         if (isFinishCountDown) {
             Intent intent;
-            if (ParseUser.getCurrentUser() != null && AccessToken.getCurrentAccessToken() != null) {
 
+            if (ParseUser.getCurrentUser() != null && AccessToken.getCurrentAccessToken() != null) {
                 intent = new Intent(getApplicationContext(), MainActivity.class);
             } else {
                 intent = new Intent(getApplicationContext(), LoginActivity.class);

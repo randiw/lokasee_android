@@ -76,6 +76,9 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
     private ImageView imgProf;
     private MarkerOptions markerOptions;
 
+    private ImageView imgProfSide;
+    private TextView txtNameSide;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +88,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         mContext = this;
 
         drawerLayout.setDrawerListener(lsDrawerListener);
+
+        renderViewSide();
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -114,6 +119,14 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         return actionbar;
     }
 
+    private void renderViewSide(){
+        imgProfSide = ButterKnife.findById(drawerLayout, R.id.img_prof_side);
+        txtNameSide = ButterKnife.findById(drawerLayout, R.id.txt_name_side);
+
+        Glide.with(mContext).load(DataHelper.getString(UserData.URL_PROF_PIC)).into(imgProfSide);
+        txtNameSide.setText(DataHelper.getString(UserData.NAME));
+    }
+
     private void setUpMarker() {
         markerOptions = new MarkerOptions();
         marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker, null);
@@ -141,10 +154,11 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
             float zoom = 14.0f;
 
             if (myMarker == null) {
-
+                Log.i(TAG, "Mymarker" + myMarker);
                 createMarker(mContext, position, name, null, DataHelper.getString(UserData.URL_PROF_PIC));
 
             } else {
+
                 myMarker.setPosition(position);
             }
 
@@ -178,6 +192,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
             @Override
             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                 super.onResourceReady(resource, glideAnimation);
+
                 imgProf.setImageBitmap(resource);
 
                 // if image already downloaded then draw marker using custom view
@@ -197,6 +212,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     private void updateMarker() {
         List<User> users = UserRepository.getAll();
+
         if (users == null) {
             return;
         }
@@ -206,6 +222,9 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         }
         for (User user : users) {
             LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
+
+            Log.i(TAG, user.getName());
+
             if (!markers.contains(user.getObject_id())) {
 
                 createMarker(mContext, latLng, user.getName(), user.getObject_id(), user.getUrl_prof_pic());
