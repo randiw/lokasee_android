@@ -8,15 +8,14 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.facebook.AccessToken;
-import com.facebook.Profile;
 import com.norbsoft.typefacehelper.TypefaceHelper;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.playing.lokasee.R;
+import com.playing.lokasee.helper.FontLibHelper;
 import com.playing.lokasee.helper.LocationManager;
 import com.playing.lokasee.helper.ParseHelper;
-import com.playing.lokasee.helper.FontLibHelper;
 import com.playing.lokasee.helper.UserData;
 
 import butterknife.Bind;
@@ -100,7 +99,6 @@ public class SplashActivity extends BaseActivity {
     }
 
     private void finishSplash() {
-//        if (isFinishCountDown || isLocationRetrieved) {
         if (isFinishCountDown) {
             Intent intent;
             if (ParseUser.getCurrentUser() != null && AccessToken.getCurrentAccessToken() != null) {
