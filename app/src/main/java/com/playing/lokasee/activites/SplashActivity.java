@@ -19,6 +19,7 @@ import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 
 import butterknife.Bind;
+import rx.Scheduler;
 import rx.functions.Action1;
 
 /**
@@ -72,6 +73,10 @@ public class SplashActivity extends BaseActivity {
                     double lat = location.getLatitude();
                     double lon = location.getLongitude();
 
+                    System.out.println("Latitude" + lat);
+                    System.out.println("Longitude" + lon);
+
+
                     UserData.saveLocation(Double.toString(lat), Double.toString(lon));
                     if (ParseUser.getCurrentUser() != null) {
                         ParseHelper.getInstance().saveMyLocation(lat, lon, new ParseHelper.OnSaveParseObjectListener() {
@@ -94,6 +99,17 @@ public class SplashActivity extends BaseActivity {
             @Override
             public void call(Throwable throwable) {
                 finishSplash();
+            }
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocationManager.checkLocation(this).unsubscribeOn(new Scheduler() {
+            @Override
+            public Worker createWorker() {
+                return null;
             }
         });
     }
