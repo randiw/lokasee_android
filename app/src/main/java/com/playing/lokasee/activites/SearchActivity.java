@@ -76,10 +76,10 @@ public class SearchActivity extends BaseActivity implements LoaderManager.Loader
     @OnItemClick(R.id.listUser)
     public void clickUser(int position) {
         User user = adapter.getItem(position);
-        Intent intent = new Intent(getApplicationContext(), SearchMapActivity.class);
+        Intent intent = new Intent();
         intent.putExtra("objId", user.getObject_id());
-        startActivity(intent);
-        Log.d(TAG, "Name: " + user.getName() + " objectId: " + user.getObject_id());
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     @Override

@@ -29,6 +29,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -90,8 +91,9 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
         searchButton.setOnClickListener(lsSearch);
 
-    }
 
+
+    }
 
     @Override
     protected View createActionBar(LayoutInflater inflater) {
@@ -233,6 +235,24 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         view.draw(canvas);
 
         return bitmap;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1){
+            if(resultCode == RESULT_OK){
+                String objId = data.getStringExtra("objId");
+                findLocationUser(objId);
+            }
+        }
+    }
+
+    private void findLocationUser(String objId) {
+        User user = UserRepository.find(objId);
+        LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
     @Subscribe
