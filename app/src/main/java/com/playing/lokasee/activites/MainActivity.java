@@ -347,8 +347,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         if (updateLocationEvent.location != null) {
             if (googleMap != null && markers != null) {
                 Location location = updateLocationEvent.location;
-//                retrieveMarkers();
-//                setMyLocation(location.getLatitude(), location.getLongitude(), null);
+                retrieveMarkers();
+                setMyLocation(location.getLatitude(), location.getLongitude(), null);
             }
         }
     }
