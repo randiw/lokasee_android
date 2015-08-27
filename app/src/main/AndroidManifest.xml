@@ -49,8 +49,8 @@
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <provider
-            android:authorities="com.playing.lokasee.view.adapter.UserContentProvider"
-            android:name=".view.adapter.UserContentProvider"/>
+            android:authorities="com.playing.lokasee.repositories.provider.UserContentProvider"
+            android:name=".repositories.provider.UserContentProvider"/>
 
         <receiver android:name=".receiver.LocationAlarm"></receiver>
 

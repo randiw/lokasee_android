@@ -15,7 +15,7 @@ import android.widget.ListView;
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
 import com.playing.lokasee.UserDao;
-import com.playing.lokasee.view.adapter.UserContentProvider;
+import com.playing.lokasee.repositories.provider.UserContentProvider;
 import com.playing.lokasee.view.adapter.UserCursorAdapter;
 
 import butterknife.Bind;

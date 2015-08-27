@@ -1,4 +1,4 @@
-package com.playing.lokasee.view.adapter;
+package com.playing.lokasee.repositories.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -17,7 +17,7 @@ import de.greenrobot.dao.DaoLog;
  */
 public class UserContentProvider extends ContentProvider {
 
-    public static final String AUTHORITY = "com.playing.lokasee.view.adapter.UserContentProvider";
+    public static final String AUTHORITY = "com.playing.lokasee.repositories.provider.UserContentProvider";
     public static final String TABLE_NAME = UserDao.TABLENAME;
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + TABLE_NAME);
     private static final int USERS = 0;
