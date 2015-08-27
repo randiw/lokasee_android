@@ -26,7 +26,29 @@
             android:background="@color/material_blue_grey_800"
             android:orientation="vertical">
 
-        </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/bg.main.black"
+                android:orientation="horizontal"
+                android:padding="15dp">
 
+                <ImageView
+                    android:id="@+id/img_prof_side"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp" />
+
+                <TextView
+                    android:id="@+id/txt_name_side"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:text="Mexan Juadha"
+                    android:textColor="@color/bg.white"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
     </android.support.v4.widget.DrawerLayout>
 </RelativeLayout>

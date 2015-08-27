@@ -13,20 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
 import com.playing.lokasee.UserDao;
 import com.playing.lokasee.helper.BusProvider;
-import com.playing.lokasee.repositories.UserRepository;
-import com.playing.lokasee.util.UtilStatic;
 import com.playing.lokasee.view.adapter.UserContentProvider;
 import com.playing.lokasee.view.adapter.UserCursorAdapter;
-import com.squareup.otto.Bus;
-
-import butterknife.Bind;
-import butterknife.ButterKnife;
 
 /**
  * Created by nabilla on 8/27/15.

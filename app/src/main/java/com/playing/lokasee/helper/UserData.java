@@ -23,8 +23,7 @@ public class UserData {
         DataHelper.saveData(NAME, name);
     }
 
-    public static void saveFacebookProfPic(String facebook_id, String url_prof_pic){
-        DataHelper.saveData(FACEBOOK_ID, facebook_id);
+    public static void saveFacebookProfPic(String url_prof_pic){
         DataHelper.saveData(URL_PROF_PIC, url_prof_pic);
     }
 
@@ -62,19 +61,32 @@ public class UserData {
         return password;
     }
 
-    public static String getLatitude() {
-        String lat = DataHelper.getString(LATITUDE);
-        return lat;
+    public static double getLatitude() {
+        String latitude = DataHelper.getString(LATITUDE);
+        if(latitude == null || latitude.length() == 0) {
+            return 0.0;
+        }
+
+        return Double.parseDouble(latitude);
     }
 
-    public static String getLongitude() {
-        String lon = DataHelper.getString(LONGITUDE);
-        return lon;
+    public static double getLongitude() {
+        String longitude = DataHelper.getString(LONGITUDE);
+        if(longitude == null || longitude.length() == 0) {
+            return 0.0;
+        }
+
+        return Double.parseDouble(longitude);
     }
 
     public static String getParseObjectId() {
         String parseObjectId = DataHelper.getString(PARSE_OBJECT_ID);
         return parseObjectId;
+    }
+
+    public static String getFacebookProfilePicUrl() {
+        String profilePic = DataHelper.getString(URL_PROF_PIC);
+        return profilePic;
     }
 
     public static boolean isLogin() {

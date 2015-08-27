@@ -1,28 +1,26 @@
 package com.playing.lokasee.activites;
 
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.app.SearchManager;
 import android.content.Context;
-import android.content.Intent;
+import android.graphics.Bitmap;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.location.Location;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.balysv.materialmenu.MaterialMenuView;
-import com.github.johnkil.print.PrintView;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -38,24 +36,25 @@ import com.playing.lokasee.R;
 import com.playing.lokasee.User;
 import com.playing.lokasee.events.UpdateLocationEvent;
 import com.playing.lokasee.helper.BusProvider;
-import com.playing.lokasee.helper.DataHelper;
+import com.playing.lokasee.helper.MarkerHelper;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 import com.playing.lokasee.repositories.UserRepository;
+import com.playing.lokasee.tools.RoundImage;
 import com.squareup.otto.Subscribe;
-
 import java.util.Hashtable;
 import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MainActivity extends BaseActivity implements OnMapReadyCallback, View.OnClickListener {
+public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
     @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
     @Bind(R.id.side_drawer) LinearLayout sideDrawer;
+    @Bind(R.id.img_prof_side) ImageView profilePicture;
+    @Bind(R.id.txt_name_side) TextView profileName;
 
     private MaterialMenuView materialMenu;
     private GoogleMap googleMap;
@@ -69,10 +68,24 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
     Boolean flagSearch = false;
     SearchView searchView;
 
+    private View marker;
+    private LinearLayout linMarker;
+    private ImageView imgProf;
+    private MarkerOptions markerOptions;
+
+    private int i = 0;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupLayout(R.layout.activity_main);
+
+        Glide.with(getApplicationContext()).load(UserData.getFacebookProfilePicUrl()).transform(new RoundImage(getApplicationContext())).into(profilePicture);
+        profileName.setText(UserData.getName());
+
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
@@ -102,23 +115,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
                 super.onDrawerStateChanged(newState);
             }
         });
-
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-    }
-        // Register Event Bus to receive event
-        // from Location Alarm
-    @Override
-    protected void onResume() {
-        super.onResume();
-        BusProvider.getInstance().register(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        BusProvider.getInstance().unregister(this);
     }
 
     @Override
@@ -130,7 +126,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
         materialMenu = ButterKnife.findById(actionbar, R.id.menuIcon);
         materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
-        materialMenu.setOnClickListener(this);
 
         searchView = ButterKnife.findById(actionbar, R.id.action_testsearch);
 
@@ -149,6 +144,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
                 Log.e(TAG, "search listener");
             }
         });
+
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
@@ -183,30 +179,34 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         };
         searchView.setOnQueryTextListener(queryTextListener);
 
-        return actionbar;
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.menuIcon:
+        materialMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 if (drawerLayout.isDrawerOpen(sideDrawer)) {
                     drawerLayout.closeDrawer(sideDrawer);
                 } else {
                     drawerLayout.openDrawer(sideDrawer);
                 }
-                break;
-        }
+            }
+        });
+
+        return actionbar;
+    }
+
+    private void setUpMarker() {
+        markerOptions = new MarkerOptions();
+        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker, null);
+        linMarker = ButterKnife.findById(marker, R.id.lin_custom_marker);
+        imgProf = ButterKnife.findById(marker, R.id.prof_img);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
 
-        lat = Double.parseDouble(UserData.getLatitude());
-        lon = Double.parseDouble(UserData.getLongitude());
+        setUpMarker();
 
-        setMyLocation(lat, lon, UserData.getName());
+        setMyLocation(UserData.getLatitude(), UserData.getLongitude(), UserData.getName());
         retrieveMarkers();
     }
 
@@ -216,14 +216,16 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
             float zoom = 14.0f;
 
             if (myMarker == null) {
-                myMarker = googleMap.addMarker(new MarkerOptions()
-                        .position(position)
-                        .title(name));
+                createMarker(position, name, null, UserData.getFacebookProfilePicUrl());
             } else {
                 myMarker.setPosition(position);
             }
 
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, zoom));
+            if (googleMap.getCameraPosition().zoom < zoom) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, zoom));
+            } else {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(googleMap.getCameraPosition().target, googleMap.getCameraPosition().zoom));
+            }
         }
     }
 
@@ -236,9 +238,76 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
             @Override
             public void onError(ParseException pe) {
+                Log.e(TAG, "parse query user exception: " + pe.getMessage());
+            }
+        });
+    }
+
+    private void createMarker(final LatLng latLng, final String name, final String objId, final String uriPhoto) {
+
+        Glide.with(getApplicationContext()).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
+            @Override
+            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                super.onResourceReady(resource, glideAnimation);
+
+                imgProf.setImageBitmap(resource);
+
+                // if image already downloaded then draw marker using custom view
+                markerOptions.position(latLng).title(name).icon(BitmapDescriptorFactory.fromBitmap(MarkerHelper.getBitmapFromView(linMarker, MainActivity.this)));
+                Log.d(TAG, "Create marker " + name + " latitude: " + latLng.latitude + " longitude: " + latLng.longitude);
+
+                if (objId == null) {
+                    myMarker = googleMap.addMarker(markerOptions);
+                } else {
+                    Marker userMarker = googleMap.addMarker(markerOptions);
+                    markers.put(objId, userMarker);
+                }
 
             }
         });
+    }
+
+    private void recursiveMarker(final List<User> users) {
+
+        if (i < users.size()) {
+
+            final String name = users.get(i).getName();
+            final String objId = users.get(i).getObject_id();
+            String uriPhoto = users.get(i).getUrl_prof_pic();
+            final LatLng position = new LatLng(users.get(i).getLatitude(), users.get(i).getLongitude());
+
+            if (!markers.contains(objId)) {
+
+                Glide.with(getApplicationContext()).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        super.onResourceReady(resource, glideAnimation);
+
+                        imgProf.setImageBitmap(resource);
+
+                        // if image already downloaded then draw marker using custom view
+                        markerOptions.position(position).title(name).icon(BitmapDescriptorFactory.fromBitmap(MarkerHelper.getBitmapFromView(linMarker, MainActivity.this)));
+                        Log.d(TAG, "Create marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
+
+                        if (objId == null) {
+                            myMarker = googleMap.addMarker(markerOptions);
+                        } else {
+                            Marker userMarker = googleMap.addMarker(markerOptions);
+                            markers.put(objId, userMarker);
+                        }
+
+                        i++;
+                        recursiveMarker(users);
+                    }
+                });
+            } else {
+                Marker userMarker = markers.get(objId);
+                userMarker.setPosition(position);
+
+                i++;
+                recursiveMarker(users);
+            }
+        }
     }
 
     private void updateMarker() {
@@ -250,20 +319,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         if (markers == null) {
             markers = new Hashtable<>();
         }
-        for (User user : users) {
-            LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
-            if (!markers.contains(user.getObject_id())) {
-                Marker userMarker = googleMap.addMarker(new MarkerOptions()
-                        .position(latLng)
-                        .title(user.getName())
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-
-                markers.put(user.getObject_id(), userMarker);
-            } else {
-                Marker userMarker = markers.get(user.getObject_id());
-                userMarker.setPosition(latLng);
-            }
-        }
+       recursiveMarker(users);
     }
 
     @Subscribe
@@ -297,7 +353,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     @Subscribe
     public void onUpdateLocation(UpdateLocationEvent updateLocationEvent) {
-        Log.i(TAG, updateLocationEvent.toString());
         if (updateLocationEvent.location != null) {
             if (googleMap != null && markers != null) {
                 Location location = updateLocationEvent.location;
@@ -305,5 +360,17 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
                 setMyLocation(location.getLatitude(), location.getLongitude(), null);
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BusProvider.getInstance().register(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        BusProvider.getInstance().unregister(this);
     }
 }
