@@ -48,7 +48,6 @@
             <data android:scheme="my.special.scheme" />
             <action android:name="android.intent.action.VIEW" />
         </activity>
-        <activity android:name=".activites.SearchActivity" />
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
