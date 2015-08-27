@@ -7,7 +7,9 @@
         android:id="@+id/drawer_layout"
         style="@style/MatchParent">
 
-        <FrameLayout style="@style/MatchParent">
+        <FrameLayout
+            android:id="@+id/frameLayout"
+            style="@style/MatchParent">
 
             <fragment
                 android:id="@+id/map"

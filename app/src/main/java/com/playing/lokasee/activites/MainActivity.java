@@ -1,5 +1,8 @@
 package com.playing.lokasee.activites;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -8,7 +11,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.location.Location;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
@@ -59,6 +64,10 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
     private double lat;
     private double lon;
     TextView title;
+    SearchFragment sf;
+    SearchFragment searchFrag;
+    Boolean flagSearch = false;
+    SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,12 +132,56 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
         materialMenu.setOnClickListener(this);
 
-//        PrintView imgSearch = ButterKnife.findById(actionbar, R.id.action_search);
-//        imgSearch.setOnClickListener(this);
+        searchView = ButterKnife.findById(actionbar, R.id.action_testsearch);
 
-//        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = ButterKnife.findById(actionbar, R.id.action_testsearch);
-        searchView.setOnClickListener(this);
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
+                title.setVisibility(View.GONE);
+
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                ft.add(R.id.frameLayout, new SearchFragment(), "tag");
+                ft.setTransition(ft.TRANSIT_FRAGMENT_OPEN);
+                ft.addToBackStack(null);
+                ft.commit();
+                Log.e(TAG, "search listener");
+            }
+        });
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                closeActionBar();
+                Log.e(TAG, "close listener");
+                return false;
+            }
+        });
+
+        SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                if(flagSearch == true){
+                    getFragmentManager().beginTransaction().remove(searchFrag).commit();
+                }
+
+                flagSearch = true;
+                Bundle bundle = new Bundle();
+                searchFrag = new SearchFragment();
+                bundle.putString("searchName", newText);
+                searchFrag.setArguments(bundle);
+
+                getFragmentManager().beginTransaction().replace(R.id.frameLayout, searchFrag).commit();
+                return false;
+            }
+        };
+        searchView.setOnQueryTextListener(queryTextListener);
 
         return actionbar;
     }
@@ -142,21 +195,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
                 } else {
                     drawerLayout.openDrawer(sideDrawer);
                 }
-                break;
-//
-//            case R.id.action_search:
-////                Intent i = new Intent(getApplicationContext(), SearchActivity.class);
-////                startActivityForResult(i, 1);
-//                Toast.makeText(getApplicationContext(), "search", Toast.LENGTH_SHORT).show();
-//                break;
-            case R.id.action_testsearch:
-                if(title.getVisibility() == View.VISIBLE) {
-                    title.setVisibility(View.GONE);
-                    Log.e(TAG, "TES");
-                }
-//                Intent i = new Intent(getApplicationContext(), SearchActivity.class);
-//                startActivityForResult(i, 1);
-//                Toast.makeText(getApplicationContext(), "test search", Toast.LENGTH_SHORT).show();
                 break;
         }
     }
@@ -205,7 +243,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     private void updateMarker() {
         List<User> users = UserRepository.getAll();
-        Log.e(TAG, "users size: " + users.size());
         if (users == null) {
             return;
         }
@@ -216,7 +253,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         for (User user : users) {
             LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
             if (!markers.contains(user.getObject_id())) {
-                Log.e(TAG, "User Profile " + user.getUrl_prof_pic());
                 Marker userMarker = googleMap.addMarker(new MarkerOptions()
                         .position(latLng)
                         .title(user.getName())
@@ -230,22 +266,33 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 1){
-            if(resultCode == RESULT_OK){
-                String objId = data.getStringExtra("objId");
-                findLocationUser(objId);
-            }
+    @Subscribe
+    public void getUserMapLocation(User user){
+        if(user != null) {
+            searchView.isIconfiedByDefault();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            searchView.onActionViewCollapsed();
+            closeActionBar();
+            
+            LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
+            CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }
     }
 
-    private void findLocationUser(String objId) {
-        User user = UserRepository.find(objId);
-        LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
-        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    private void closeActionBar() {
+        materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
+        title.setVisibility(View.VISIBLE);
+
+        FragmentManager fm1 = getFragmentManager();
+        FragmentTransaction ft1 = fm1.beginTransaction();
+        sf = (SearchFragment) fm1.findFragmentByTag("tag");
+        ft1.remove(sf);
+        if (flagSearch == true)
+            ft1.remove(searchFrag);
+        ft1.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+        ft1.commit();
     }
 
     @Subscribe
