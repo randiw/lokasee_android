@@ -93,6 +93,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
         drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -121,7 +122,10 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                 super.onDrawerStateChanged(newState);
             }
         });
+
     }
+
+
 
     @Override
     protected View createActionBar(LayoutInflater inflater) {
@@ -244,12 +248,15 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
         if (i < users.size()) {
 
+
+
             final String name = users.get(i).getName();
             final String objId = users.get(i).getObject_id();
             String uriPhoto = users.get(i).getUrl_prof_pic();
             final LatLng position = new LatLng(users.get(i).getLatitude(), users.get(i).getLongitude());
 
-            if (!markers.contains(objId)) {
+
+            if (!markers.containsKey(objId)) {
 
                 Glide.with(getApplicationContext()).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
                     @Override
@@ -262,12 +269,9 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                         markerOptions.position(position).title(name).icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(linMarker, MainActivity.this)));
                         Log.d(TAG, "Create marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
 
-                        if (objId == null) {
-                            myMarker = googleMap.addMarker(markerOptions);
-                        } else {
-                            Marker userMarker = googleMap.addMarker(markerOptions);
-                            markers.put(objId, userMarker);
-                        }
+                        Marker userMarker = googleMap.addMarker(markerOptions);
+                        markers.put(objId, userMarker);
+
 
                         i++;
                         recursiveMarker(users);
@@ -276,6 +280,9 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                 });
 
             } else {
+
+                Log.d(TAG, "Update marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
+
                 Marker userMarker = markers.get(objId);
                 userMarker.setPosition(position);
 
@@ -315,8 +322,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         }
 
         Log.i(TAG, "Size Of user" + users.size());
-        for(User user : users)
-         Log.i(TAG, "Name" + user.getName());
+        for (User user : users)
+            Log.i(TAG, "Name" + user.getName());
 
         recursiveMarker(users);
     }
@@ -344,8 +351,14 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
     @Subscribe
     public void onUpdateLocation(UpdateLocationEvent updateLocationEvent) {
+
         if (updateLocationEvent.location != null) {
+
             if (googleMap != null && markers != null) {
+
+                // Reset count location
+                i = 0;
+
                 Location location = updateLocationEvent.location;
                 retrieveMarkers();
                 setMyLocation(location.getLatitude(), location.getLongitude(), null);

@@ -27,7 +27,7 @@ public abstract class BaseActivity extends FragmentActivity {
     private LocationAlarm locationAlarm;
 
     private enum Alarm {
-        SHORT(TimeUnit.MINUTES, 1),
+        SHORT(TimeUnit.MINUTES, 5),
         LONG(TimeUnit.HOURS, 1);
 
         private TimeUnit timeUnit;
@@ -60,11 +60,13 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     protected void initActionBar(View customActionBar) {
+
         if (customActionBar != null) {
             ActionBar actionBar = getActionBar();
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
             actionBar.setCustomView(customActionBar);
         }
+
     }
 
     protected View createActionBar(LayoutInflater inflater) {
