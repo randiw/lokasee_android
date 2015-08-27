@@ -6,6 +6,8 @@
 
     <!-- fonts -->
     <string name="Harabara">fonts/harabara_font.otf</string>
+    <string name="MaterialIconFont">fonts/material-icon-font.ttf</string>
+    <string name="HoloIconFont">fonts/holo-icon-font.ttf</string>
 
     <string name="app_name">LokaSee</string>
     <string name="hello_world">Hello world!</string>

@@ -20,8 +20,6 @@ public class DataHelper {
     }
 
     public static void saveData(String key, String value) {
-        System.out.println("lat on Userdata " + value);
-
         editor.putString(key, value);
         editor.commit();
     }

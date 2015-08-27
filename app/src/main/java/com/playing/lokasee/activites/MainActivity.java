@@ -37,9 +37,11 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
+import com.playing.lokasee.UserDao;
 import com.playing.lokasee.events.UpdateLocationEvent;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.DataHelper;
+import com.playing.lokasee.helper.MarkerHelper;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 import com.playing.lokasee.repositories.UserRepository;
@@ -50,8 +52,9 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class MainActivity extends BaseActivity implements OnMapReadyCallback, View.OnClickListener {
+public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -66,11 +69,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
     private GoogleMap googleMap;
     private Marker myMarker;
     private Hashtable<String, Marker> markers;
-    private double lat;
-    private double lon;
-    private Context mContext;
 
-    // View for custom Marker
     private View marker;
     private LinearLayout linMarker;
     private ImageView imgProf;
@@ -78,6 +77,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     private ImageView imgProfSide;
     private TextView txtNameSide;
+    private Context mContext;
+    private int i = 0;
 
 
     @Override
@@ -87,17 +88,39 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
         mContext = this;
 
-        drawerLayout.setDrawerListener(lsDrawerListener);
 
         renderViewSide();
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                materialMenu.setTransformationOffset(MaterialMenuDrawable.AnimationState.BURGER_ARROW, drawerLayout.isDrawerOpen(sideDrawer) ? 2 - slideOffset : slideOffset);
+            }
 
-        searchButton.setOnClickListener(lsSearch);
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+            }
 
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+            }
 
-
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                if (newState == DrawerLayout.STATE_IDLE) {
+                    if (drawerLayout.isDrawerOpen(sideDrawer)) {
+                        materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
+                    } else {
+                        materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
+                    }
+                }
+                super.onDrawerStateChanged(newState);
+            }
+        });
     }
 
     @Override
@@ -109,17 +132,31 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
         materialMenu = ButterKnife.findById(actionbar, R.id.menuIcon);
         materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
-        materialMenu.setOnClickListener(this);
+        materialMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (drawerLayout.isDrawerOpen(sideDrawer)) {
+                    drawerLayout.closeDrawer(sideDrawer);
+                } else {
+                    drawerLayout.openDrawer(sideDrawer);
+                }
+            }
+        });
 
-        PrintView imgRefresh = ButterKnife.findById(actionbar, R.id.action_refresh);
-
-        imgRefresh.setOnClickListener(this);
-
+        PrintView refresh = ButterKnife.findById(actionbar, R.id.action_refresh);
+        refresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (googleMap != null && markers != null) {
+                    retrieveMarkers();
+                }
+            }
+        });
 
         return actionbar;
     }
 
-    private void renderViewSide(){
+    private void renderViewSide() {
         imgProfSide = ButterKnife.findById(drawerLayout, R.id.img_prof_side);
         txtNameSide = ButterKnife.findById(drawerLayout, R.id.txt_name_side);
 
@@ -140,23 +177,18 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
         setUpMarker();
 
-        lat = Double.parseDouble(UserData.getLatitude());
-        lon = Double.parseDouble(UserData.getLongitude());
-
-        setMyLocation(lat, lon, UserData.getName());
+        setMyLocation(UserData.getLatitude(), UserData.getLongitude(), UserData.getName());
         retrieveMarkers();
     }
 
     private void setMyLocation(double latitude, double longitude, String name) {
-
         if (googleMap != null) {
             LatLng position = new LatLng(latitude, longitude);
             float zoom = 14.0f;
 
             if (myMarker == null) {
                 Log.i(TAG, "Mymarker" + myMarker);
-                createMarker(mContext, position, name, null, DataHelper.getString(UserData.URL_PROF_PIC));
-
+                createMarker(position, name, null, UserData.getFacebookProfilePicUrl());
             } else {
 
                 myMarker.setPosition(position);
@@ -167,8 +199,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
             } else {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(googleMap.getCameraPosition().target, googleMap.getCameraPosition().zoom));
             }
-
-            Log.i(TAG, "Zoom Level" + googleMap.getCameraPosition().zoom);
         }
     }
 
@@ -186,9 +216,9 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         });
     }
 
-    private void createMarker(final Context mContext, final LatLng latLng, final String name, final String objId, final String uriPhoto) {
+    private void createMarker(final LatLng latLng, final String name, final String objId, final String uriPhoto) {
 
-        Glide.with(mContext).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
+        Glide.with(getApplicationContext()).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
             @Override
             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                 super.onResourceReady(resource, glideAnimation);
@@ -196,7 +226,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
                 imgProf.setImageBitmap(resource);
 
                 // if image already downloaded then draw marker using custom view
-                markerOptions.position(latLng).title(name).icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(linMarker, mContext)));
+                markerOptions.position(latLng).title(name).icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(linMarker, MainActivity.this)));
+                Log.d(TAG, "Create marker " + name + " latitude: " + latLng.latitude + " longitude: " + latLng.longitude);
 
                 if (objId == null) {
                     myMarker = googleMap.addMarker(markerOptions);
@@ -209,6 +240,68 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         });
     }
 
+    private void recursiveMarker(final List<User> users) {
+
+        if (i < users.size()) {
+
+            final String name = users.get(i).getName();
+            final String objId = users.get(i).getObject_id();
+            String uriPhoto = users.get(i).getUrl_prof_pic();
+            final LatLng position = new LatLng(users.get(i).getLatitude(), users.get(i).getLongitude());
+
+            if (!markers.contains(objId)) {
+
+                Glide.with(getApplicationContext()).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        super.onResourceReady(resource, glideAnimation);
+
+                        imgProf.setImageBitmap(resource);
+
+                        // if image already downloaded then draw marker using custom view
+                        markerOptions.position(position).title(name).icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(linMarker, MainActivity.this)));
+                        Log.d(TAG, "Create marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
+
+                        if (objId == null) {
+                            myMarker = googleMap.addMarker(markerOptions);
+                        } else {
+                            Marker userMarker = googleMap.addMarker(markerOptions);
+                            markers.put(objId, userMarker);
+                        }
+
+                        i++;
+                        recursiveMarker(users);
+
+                    }
+                });
+
+            } else {
+                Marker userMarker = markers.get(objId);
+                userMarker.setPosition(position);
+
+                i++;
+                recursiveMarker(users);
+            }
+
+
+        }
+    }
+
+    public static Bitmap getBitmapFromView(View view, Context mContext) {
+        // Convert a view to bitmap
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+
+        return bitmap;
+    }
 
     private void updateMarker() {
         List<User> users = UserRepository.getAll();
@@ -220,48 +313,21 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         if (markers == null) {
             markers = new Hashtable<>();
         }
-        for (User user : users) {
-            LatLng latLng = new LatLng(user.getLatitude(), user.getLongitude());
 
-            Log.i(TAG, user.getName());
+        Log.i(TAG, "Size Of user" + users.size());
+        for(User user : users)
+         Log.i(TAG, "Name" + user.getName());
 
-            if (!markers.contains(user.getObject_id())) {
-
-                createMarker(mContext, latLng, user.getName(), user.getObject_id(), user.getUrl_prof_pic());
-
-            } else {
-                Marker userMarker = markers.get(user.getObject_id());
-                userMarker.setPosition(latLng);
-            }
-        }
-    }
-
-    public static Bitmap getBitmapFromView(View view, Context mContext) {
-
-        // Create display metric
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-
-        // Set LayoutParams (Height and Width) from view
-        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
-        view.buildDrawingCache();
-
-        // Concert bitmap from view
-        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        view.draw(canvas);
-
-        return bitmap;
+        recursiveMarker(users);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 1){
-            if(resultCode == RESULT_OK){
-                String objId = data.getStringExtra("objId");
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                String objId = data.getStringExtra(UserDao.Properties.Object_id.name);
+                Log.d(TAG, "objecId: " + objId);
                 findLocationUser(objId);
             }
         }
@@ -269,85 +335,28 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
 
     private void findLocationUser(String objId) {
         User user = UserRepository.find(objId);
+        Log.d(TAG, "User: " + user.getName() + " latitude: " + user.getLatitude() + " longitude: " + user.getLongitude());
+
         LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
         CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
-        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
     @Subscribe
     public void onUpdateLocation(UpdateLocationEvent updateLocationEvent) {
-        Log.i(TAG, updateLocationEvent.toString());
         if (updateLocationEvent.location != null) {
             if (googleMap != null && markers != null) {
                 Location location = updateLocationEvent.location;
-                retrieveMarkers();
-                lat = location.getLatitude();
-                lon = location.getLongitude();
-                setMyLocation(lat, lon, null);
+//                retrieveMarkers();
+//                setMyLocation(location.getLatitude(), location.getLongitude(), null);
             }
         }
     }
 
-    /* #  LISTENER FUNCTION # */
-
-    View.OnClickListener lsSearch = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent i = new Intent(getApplicationContext(), SearchActivity.class);
-            startActivity(i);
-        }
-    };
-
-    DrawerLayout.SimpleDrawerListener lsDrawerListener = new DrawerLayout.SimpleDrawerListener() {
-        @Override
-        public void onDrawerSlide(View drawerView, float slideOffset) {
-            materialMenu.setTransformationOffset(MaterialMenuDrawable.AnimationState.BURGER_ARROW, drawerLayout.isDrawerOpen(sideDrawer) ? 2 - slideOffset : slideOffset);
-        }
-
-        @Override
-        public void onDrawerOpened(View drawerView) {
-            super.onDrawerOpened(drawerView);
-        }
-
-        @Override
-        public void onDrawerClosed(View drawerView) {
-            super.onDrawerClosed(drawerView);
-        }
-
-        @Override
-        public void onDrawerStateChanged(int newState) {
-            if (newState == DrawerLayout.STATE_IDLE) {
-                if (drawerLayout.isDrawerOpen(sideDrawer)) {
-                    materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
-                } else {
-                    materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
-                }
-            }
-            super.onDrawerStateChanged(newState);
-        }
-    };
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.action_refresh:
-                if (googleMap != null && markers != null) {
-                    Log.i(TAG, "Clear Map");
-                    retrieveMarkers();
-                    setMyLocation(lat, lon, DataHelper.getString("name"));
-                }
-                break;
-
-            case R.id.menuIcon:
-                if (drawerLayout.isDrawerOpen(sideDrawer)) {
-                    drawerLayout.closeDrawer(sideDrawer);
-                } else {
-                    drawerLayout.openDrawer(sideDrawer);
-                }
-                break;
-        }
+    @OnClick(R.id.search)
+    public void searchUser(View view) {
+        startActivityForResult(new Intent(getApplicationContext(), SearchActivity.class), 1);
     }
-
 
     @Override
     protected void onResume() {
@@ -360,12 +369,4 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback, Vi
         super.onPause();
         BusProvider.getInstance().unregister(this);
     }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-    }
-
-
 }

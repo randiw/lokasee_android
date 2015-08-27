@@ -8,15 +8,14 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.facebook.AccessToken;
-import com.facebook.Profile;
 import com.norbsoft.typefacehelper.TypefaceHelper;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.playing.lokasee.R;
+import com.playing.lokasee.helper.FontLibHelper;
 import com.playing.lokasee.helper.LocationManager;
 import com.playing.lokasee.helper.ParseHelper;
-import com.playing.lokasee.helper.FontLibHelper;
 import com.playing.lokasee.helper.UserData;
 
 import butterknife.Bind;
@@ -73,10 +72,6 @@ public class SplashActivity extends BaseActivity {
                 if (location != null) {
                     double lat = location.getLatitude();
                     double lon = location.getLongitude();
-
-                    System.out.println("Latitude" + lat);
-                    System.out.println("Longitude" + lon);
-
 
                     UserData.saveLocation(Double.toString(lat), Double.toString(lon));
                     if (ParseUser.getCurrentUser() != null) {

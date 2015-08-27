@@ -8,8 +8,9 @@ import com.facebook.FacebookSdk;
 import com.github.johnkil.print.PrintConfig;
 import com.parse.Parse;
 import com.playing.lokasee.helper.DataHelper;
-import com.playing.lokasee.view.adapter.UserContentProvider;
 import com.playing.lokasee.helper.FontLibHelper;
+import com.playing.lokasee.view.adapter.UserContentProvider;
+
 import io.fabric.sdk.android.Fabric;
 
 /**
@@ -29,7 +30,7 @@ public class LokaseeApplication extends Application {
 
         DataHelper.init(instance);
 
-        PrintConfig.initDefault(getAssets(), "fonts/material-icon-font.ttf");
+        PrintConfig.initDefault(getAssets(), getString(R.string.MaterialIconFont));
         FacebookSdk.sdkInitialize(getApplicationContext());
         setupParse();
 
@@ -55,7 +56,6 @@ public class LokaseeApplication extends Application {
 
         UserContentProvider.setDaoSession(daoSession);
     }
-
 
     public DaoSession getDaoSession() {
         return daoSession;

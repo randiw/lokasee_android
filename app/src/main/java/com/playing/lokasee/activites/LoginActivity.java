@@ -3,7 +3,6 @@ package com.playing.lokasee.activites;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Window;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -34,7 +33,7 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setFullScreen();
         setupLayout(R.layout.activity_login);
 
         callbackManager = CallbackManager.Factory.create();
@@ -45,7 +44,7 @@ public class LoginActivity extends BaseActivity {
                 Profile profile = Profile.getCurrentProfile();
                 if (profile != null) {
                     UserData.saveFacebookLogin(profile.getId(), profile.getName());
-                    UserData.saveFacebookProfPic(profile.getId(), String.valueOf(profile.getProfilePictureUri(50, 50)));
+                    UserData.saveFacebookProfPic(profile.getProfilePictureUri(50, 50).toString());
                     loginParse(profile);
                 }
             }
@@ -74,7 +73,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     private void signUpParse(Profile profile) {
-        ParseHelper.getInstance().signUp(profile.getFirstName(), profile.getLastName(), profile.getName(), String.valueOf(profile.getProfilePictureUri(50, 50)), profile.getId(), new ParseHelper.OnLogParseListener() {
+        ParseHelper.getInstance().signUp(profile.getFirstName(), profile.getLastName(), profile.getName(), profile.getProfilePictureUri(50, 50).toString(), profile.getId(), new ParseHelper.OnLogParseListener() {
             @Override
             public void onSuccess(ParseUser parseUser) {
                 updateLocation();
@@ -92,7 +91,6 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onSuccess(ParseUser parseUser) {
                 updateParse(profile);
-                Log.e(TAG, String.valueOf(profile.getProfilePictureUri(50, 50)));
                 updateLocation();
             }
 
@@ -104,8 +102,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     public static void updateParse(Profile profile) {
-        ParseHelper.getInstance().updateUser(profile.getFirstName(), profile.getLastName(), profile.getName(), String.valueOf(profile.getProfilePictureUri(50,50)), profile.getId(), new ParseHelper.OnLogParseListener(){
-
+        ParseHelper.getInstance().updateUser(profile.getFirstName(), profile.getLastName(), profile.getName(), profile.getProfilePictureUri(50, 50).toString(), profile.getId(), new ParseHelper.OnLogParseListener() {
             @Override
             public void onError(ParseException pe) {
                 Log.e(TAG, "update parse: gagal");
@@ -119,10 +116,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     private void updateLocation() {
-        double latitude = Double.parseDouble(UserData.getLatitude());
-        double longitude = Double.parseDouble(UserData.getLongitude());
-
-        ParseHelper.getInstance().saveMyLocation(latitude, longitude, new ParseHelper.OnSaveParseObjectListener() {
+        ParseHelper.getInstance().saveMyLocation(UserData.getLatitude(), UserData.getLongitude(), new ParseHelper.OnSaveParseObjectListener() {
             @Override
             public void onSaveParseObject(ParseObject parseObject) {
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
