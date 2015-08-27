@@ -1,6 +1,5 @@
 package com.playing.lokasee.presenter;
 
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 

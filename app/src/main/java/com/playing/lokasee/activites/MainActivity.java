@@ -46,7 +46,9 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import nucleus.factory.RequiresPresenter;
 
+@RequiresPresenter(MainPresenter.class)
 public class MainActivity extends NucleusBaseActivity<MainPresenter> implements OnMapReadyCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();

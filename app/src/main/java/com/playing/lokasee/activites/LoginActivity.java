@@ -7,10 +7,12 @@ import com.playing.lokasee.R;
 import com.playing.lokasee.presenter.LoginPresenter;
 
 import butterknife.OnClick;
+import nucleus.factory.RequiresPresenter;
 
 /**
  * Created by nabilla on 8/18/15.
  */
+@RequiresPresenter(LoginPresenter.class)
 public class LoginActivity extends NucleusBaseActivity<LoginPresenter> {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
