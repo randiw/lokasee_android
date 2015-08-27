@@ -1,18 +1,14 @@
 package com.playing.lokasee.activites;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -40,7 +36,6 @@ import com.playing.lokasee.User;
 import com.playing.lokasee.UserDao;
 import com.playing.lokasee.events.UpdateLocationEvent;
 import com.playing.lokasee.helper.BusProvider;
-import com.playing.lokasee.helper.DataHelper;
 import com.playing.lokasee.helper.MarkerHelper;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
@@ -58,12 +53,11 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    @Bind(R.id.drawer_layout)
-    DrawerLayout drawerLayout;
-    @Bind(R.id.side_drawer)
-    LinearLayout sideDrawer;
-    @Bind(R.id.search)
-    Button searchButton;
+    @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
+    @Bind(R.id.side_drawer) LinearLayout sideDrawer;
+    @Bind(R.id.search) Button searchButton;
+    @Bind(R.id.img_prof_side) ImageView profilePicture;
+    @Bind(R.id.txt_name_side) TextView profileName;
 
     private MaterialMenuView materialMenu;
     private GoogleMap googleMap;
@@ -75,9 +69,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     private ImageView imgProf;
     private MarkerOptions markerOptions;
 
-    private ImageView imgProfSide;
-    private TextView txtNameSide;
-    private Context mContext;
     private int i = 0;
 
 
@@ -86,13 +77,12 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setupLayout(R.layout.activity_main);
 
-        mContext = this;
-
-
-        renderViewSide();
+        Glide.with(getApplicationContext()).load(UserData.getFacebookProfilePicUrl()).into(profilePicture);
+        profileName.setText(UserData.getName());
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
         drawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -156,14 +146,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         return actionbar;
     }
 
-    private void renderViewSide() {
-        imgProfSide = ButterKnife.findById(drawerLayout, R.id.img_prof_side);
-        txtNameSide = ButterKnife.findById(drawerLayout, R.id.txt_name_side);
-
-        Glide.with(mContext).load(DataHelper.getString(UserData.URL_PROF_PIC)).into(imgProfSide);
-        txtNameSide.setText(DataHelper.getString(UserData.NAME));
-    }
-
     private void setUpMarker() {
         markerOptions = new MarkerOptions();
         marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker, null);
@@ -187,10 +169,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
             float zoom = 14.0f;
 
             if (myMarker == null) {
-                Log.i(TAG, "Mymarker" + myMarker);
                 createMarker(position, name, null, UserData.getFacebookProfilePicUrl());
             } else {
-
                 myMarker.setPosition(position);
             }
 
@@ -211,7 +191,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
             @Override
             public void onError(ParseException pe) {
-
+                Log.e(TAG, "parse query user exception: " + pe.getMessage());
             }
         });
     }
@@ -226,7 +206,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                 imgProf.setImageBitmap(resource);
 
                 // if image already downloaded then draw marker using custom view
-                markerOptions.position(latLng).title(name).icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(linMarker, MainActivity.this)));
+                markerOptions.position(latLng).title(name).icon(BitmapDescriptorFactory.fromBitmap(MarkerHelper.getBitmapFromView(linMarker, MainActivity.this)));
                 Log.d(TAG, "Create marker " + name + " latitude: " + latLng.latitude + " longitude: " + latLng.longitude);
 
                 if (objId == null) {
@@ -259,7 +239,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                         imgProf.setImageBitmap(resource);
 
                         // if image already downloaded then draw marker using custom view
-                        markerOptions.position(position).title(name).icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(linMarker, MainActivity.this)));
+                        markerOptions.position(position).title(name).icon(BitmapDescriptorFactory.fromBitmap(MarkerHelper.getBitmapFromView(linMarker, MainActivity.this)));
                         Log.d(TAG, "Create marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
 
                         if (objId == null) {
@@ -271,10 +251,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
                         i++;
                         recursiveMarker(users);
-
                     }
                 });
-
             } else {
                 Marker userMarker = markers.get(objId);
                 userMarker.setPosition(position);
@@ -282,30 +260,11 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                 i++;
                 recursiveMarker(users);
             }
-
-
         }
-    }
-
-    public static Bitmap getBitmapFromView(View view, Context mContext) {
-        // Convert a view to bitmap
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
-        view.buildDrawingCache();
-        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-
-        Canvas canvas = new Canvas(bitmap);
-        view.draw(canvas);
-
-        return bitmap;
     }
 
     private void updateMarker() {
         List<User> users = UserRepository.getAll();
-
         if (users == null) {
             return;
         }
@@ -313,10 +272,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         if (markers == null) {
             markers = new Hashtable<>();
         }
-
-        Log.i(TAG, "Size Of user" + users.size());
-        for(User user : users)
-         Log.i(TAG, "Name" + user.getName());
 
         recursiveMarker(users);
     }
@@ -327,7 +282,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
                 String objId = data.getStringExtra(UserDao.Properties.Object_id.name);
-                Log.d(TAG, "objecId: " + objId);
                 findLocationUser(objId);
             }
         }
@@ -335,10 +289,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
     private void findLocationUser(String objId) {
         User user = UserRepository.find(objId);
-        Log.d(TAG, "User: " + user.getName() + " latitude: " + user.getLatitude() + " longitude: " + user.getLongitude());
-
         LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(20).build();
         googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
