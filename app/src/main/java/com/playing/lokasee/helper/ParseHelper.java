@@ -162,7 +162,6 @@ public class ParseHelper {
         if(currentUser == null) {
             currentUser = ParseUser.getCurrentUser();
         }
-
         if(userLocation == null) {
             retrieveMyLocation(UserData.getFacebookId(), new OnParseQueryListener() {
                 @Override
