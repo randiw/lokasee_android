@@ -29,6 +29,9 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="79aef01e064ef989312507835ca4807799a2919b" />
 
         <!-- activities-->
         <activity
@@ -41,21 +44,24 @@
             </intent-filter>
         </activity>
         <activity android:name=".activites.LoginActivity" />
-        <activity android:name=".activites.MainActivity" />
+        <activity android:name=".activites.MainActivity">
+            <data android:scheme="my.special.scheme" />
+            <action android:name="android.intent.action.VIEW" />
+        </activity>
+        <activity android:name=".activites.SearchActivity" />
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <!-- providers -->
         <provider
-            android:authorities="com.playing.lokasee.repositories.provider.UserContentProvider"
-            android:name=".repositories.provider.UserContentProvider"/>
+            android:name=".repositories.provider.UserContentProvider"
+            android:authorities="com.playing.lokasee.repositories.provider.UserContentProvider" />
 
-        <receiver android:name=".receiver.LocationAlarm"></receiver>
+        <!-- receivers -->
+        <receiver android:name=".receiver.LocationAlarm" />
 
-
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="79aef01e064ef989312507835ca4807799a2919b" />
     </application>
 </manifest>
