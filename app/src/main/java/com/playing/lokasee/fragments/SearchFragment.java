@@ -1,9 +1,8 @@
-package com.playing.lokasee.activites;
+package com.playing.lokasee.fragments;
 
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
-import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -18,26 +17,28 @@ import com.playing.lokasee.R;
 import com.playing.lokasee.User;
 import com.playing.lokasee.UserDao;
 import com.playing.lokasee.helper.BusProvider;
-import com.playing.lokasee.view.adapter.UserContentProvider;
+import com.playing.lokasee.repositories.provider.UserContentProvider;
 import com.playing.lokasee.view.adapter.UserCursorAdapter;
 
 /**
  * Created by nabilla on 8/27/15.
  */
-public class SearchFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class SearchFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static String TAG = SearchFragment.class.getSimpleName();
-    private static int LIST_ID = 11;
-    String name;
-    UserCursorAdapter adapter;
+
+    private static final int LIST_ID = 11;
+
+    private String name;
+    private UserCursorAdapter adapter;
 
     @Override
-    public void onCreate(Bundle savedInstanceState){
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search, container, false);
 
         ListView listviewUser = (ListView) rootView.findViewById(R.id.listUser);
@@ -53,7 +54,7 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         });
 
         Bundle searchName = this.getArguments();
-        if(searchName == null) {
+        if (searchName == null) {
             Log.d(TAG, "null");
             name = "";
         } else {
@@ -67,21 +68,19 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if(LIST_ID != id){
-            return null;
-        } else {
-            if(!name.equals("")) {
-                String selection = UserDao.Properties.Name.columnName + " like '%" + name + "%'";
-                return new CursorLoader(getActivity(), UserContentProvider.CONTENT_URI, null, selection, null, null);
-            } else {
-                return new CursorLoader(getActivity(), UserContentProvider.CONTENT_URI, null, null, null, null);
+        if (LIST_ID == id) {
+            String selection = null;
+            if (!name.equals("")) {
+                selection = UserDao.Properties.Name.columnName + " like '%" + name + "%'";
             }
+            return new CursorLoader(getActivity(), UserContentProvider.CONTENT_URI, null, selection, null, null);
         }
+        return null;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if(LIST_ID == loader.getId()){
+        if (LIST_ID == loader.getId()) {
             adapter.swapCursor(data);
             adapter.notifyDataSetChanged();
         }
@@ -89,7 +88,7 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        if(LIST_ID == loader.getId()){
+        if (LIST_ID == loader.getId()) {
             adapter.swapCursor(null);
             adapter.notifyDataSetChanged();
         }

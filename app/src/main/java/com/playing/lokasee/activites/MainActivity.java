@@ -35,6 +35,7 @@ import com.parse.ParseObject;
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
 import com.playing.lokasee.events.UpdateLocationEvent;
+import com.playing.lokasee.fragments.SearchFragment;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.MarkerHelper;
 import com.playing.lokasee.helper.ParseHelper;
