@@ -197,9 +197,6 @@ public class ParseHelper {
         }
     }
 
-    public void updateUser(String firstName, String lastName, String s, String id, OnLogParseListener onLogParseListener) {
-    }
-
     public abstract interface OnParseListener {
         public void onError(ParseException pe);
     }

@@ -1,7 +1,8 @@
 package com.playing.lokasee.activites;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
@@ -9,9 +10,10 @@ import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
@@ -19,7 +21,6 @@ import com.balysv.materialmenu.MaterialMenuView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
-import com.github.johnkil.print.PrintView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -33,21 +34,18 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
-import com.playing.lokasee.UserDao;
 import com.playing.lokasee.events.UpdateLocationEvent;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.MarkerHelper;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
 import com.playing.lokasee.repositories.UserRepository;
+import com.playing.lokasee.tools.RoundImage;
 import com.squareup.otto.Subscribe;
-
 import java.util.Hashtable;
 import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
@@ -55,7 +53,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
     @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
     @Bind(R.id.side_drawer) LinearLayout sideDrawer;
-    @Bind(R.id.search) Button searchButton;
     @Bind(R.id.img_prof_side) ImageView profilePicture;
     @Bind(R.id.txt_name_side) TextView profileName;
 
@@ -63,6 +60,13 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     private GoogleMap googleMap;
     private Marker myMarker;
     private Hashtable<String, Marker> markers;
+    private double lat;
+    private double lon;
+    TextView title;
+    SearchFragment sf;
+    SearchFragment searchFrag;
+    Boolean flagSearch = false;
+    SearchView searchView;
 
     private View marker;
     private LinearLayout linMarker;
@@ -77,7 +81,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setupLayout(R.layout.activity_main);
 
-        Glide.with(getApplicationContext()).load(UserData.getFacebookProfilePicUrl()).into(profilePicture);
+        Glide.with(getApplicationContext()).load(UserData.getFacebookProfilePicUrl()).transform(new RoundImage(getApplicationContext())).into(profilePicture);
         profileName.setText(UserData.getName());
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
@@ -117,11 +121,64 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     protected View createActionBar(LayoutInflater inflater) {
         View actionbar = inflater.inflate(R.layout.actionbar, null);
 
-        TextView title = ButterKnife.findById(actionbar, R.id.title);
+        title = ButterKnife.findById(actionbar, R.id.title);
         title.setText(R.string.app_name);
 
         materialMenu = ButterKnife.findById(actionbar, R.id.menuIcon);
         materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
+
+        searchView = ButterKnife.findById(actionbar, R.id.action_testsearch);
+
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
+                title.setVisibility(View.GONE);
+
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                ft.add(R.id.frameLayout, new SearchFragment(), "tag");
+                ft.setTransition(ft.TRANSIT_FRAGMENT_OPEN);
+                ft.addToBackStack(null);
+                ft.commit();
+                Log.e(TAG, "search listener");
+            }
+        });
+
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                closeActionBar();
+                Log.e(TAG, "close listener");
+                return false;
+            }
+        });
+
+        SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                if(flagSearch == true){
+                    getFragmentManager().beginTransaction().remove(searchFrag).commit();
+                }
+
+                flagSearch = true;
+                Bundle bundle = new Bundle();
+                searchFrag = new SearchFragment();
+                bundle.putString("searchName", newText);
+                searchFrag.setArguments(bundle);
+
+                getFragmentManager().beginTransaction().replace(R.id.frameLayout, searchFrag).commit();
+                return false;
+            }
+        };
+        searchView.setOnQueryTextListener(queryTextListener);
+
         materialMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -129,16 +186,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                     drawerLayout.closeDrawer(sideDrawer);
                 } else {
                     drawerLayout.openDrawer(sideDrawer);
-                }
-            }
-        });
-
-        PrintView refresh = ButterKnife.findById(actionbar, R.id.action_refresh);
-        refresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (googleMap != null && markers != null) {
-                    retrieveMarkers();
                 }
             }
         });
@@ -272,26 +319,36 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         if (markers == null) {
             markers = new Hashtable<>();
         }
-
-        recursiveMarker(users);
+       recursiveMarker(users);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) {
-            if (resultCode == RESULT_OK) {
-                String objId = data.getStringExtra(UserDao.Properties.Object_id.name);
-                findLocationUser(objId);
-            }
+    @Subscribe
+    public void getUserMapLocation(User user){
+        if(user != null) {
+            searchView.isIconfiedByDefault();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            searchView.onActionViewCollapsed();
+            closeActionBar();
+            
+            LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
+            CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         }
     }
 
-    private void findLocationUser(String objId) {
-        User user = UserRepository.find(objId);
-        LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(20).build();
-        googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    private void closeActionBar() {
+        materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
+        title.setVisibility(View.VISIBLE);
+
+        FragmentManager fm1 = getFragmentManager();
+        FragmentTransaction ft1 = fm1.beginTransaction();
+        sf = (SearchFragment) fm1.findFragmentByTag("tag");
+        ft1.remove(sf);
+        if (flagSearch == true)
+            ft1.remove(searchFrag);
+        ft1.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+        ft1.commit();
     }
 
     @Subscribe
@@ -303,11 +360,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                 setMyLocation(location.getLatitude(), location.getLongitude(), null);
             }
         }
-    }
-
-    @OnClick(R.id.search)
-    public void searchUser(View view) {
-        startActivityForResult(new Intent(getApplicationContext(), SearchActivity.class), 1);
     }
 
     @Override

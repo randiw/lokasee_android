@@ -3,15 +3,33 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/searchEdit"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"/>
+        android:layout_height="wrap_content">
+        <EditText
+            android:id="@+id/searchEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:paddingLeft="50dp"
+            android:hint="search"/>
+        <com.github.johnkil.print.PrintView
+            xmlns:print="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/action_search"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:padding="10dp"
+            print:iconColor="@android:color/black"
+            print:iconSize="22dp"
+            print:iconText="@string/ic_material_search"/>
+
+    </RelativeLayout>
+
     <ListView
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="15dp"
-        android:id="@+id/listUser">
-    </ListView>
+        android:id="@+id/listUser"
+        android:divider="@null"
+        android:dividerHeight="0dp"/>
 </LinearLayout>

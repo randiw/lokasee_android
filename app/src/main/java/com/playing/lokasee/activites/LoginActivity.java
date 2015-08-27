@@ -14,8 +14,10 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.playing.lokasee.R;
+import com.playing.lokasee.UserDao;
 import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
+import com.playing.lokasee.repositories.UserRepository;
 
 import java.util.Arrays;
 
@@ -46,6 +48,7 @@ public class LoginActivity extends BaseActivity {
                     UserData.saveFacebookLogin(profile.getId(), profile.getName());
                     UserData.saveFacebookProfPic(profile.getProfilePictureUri(50, 50).toString());
                     loginParse(profile);
+
                 }
             }
 
