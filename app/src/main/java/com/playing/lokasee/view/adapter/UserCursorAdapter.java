@@ -56,7 +56,7 @@ public class UserCursorAdapter extends CursorAdapter {
 
         ViewHolder holder = new ViewHolder(customListView);
         customListView.setTag(holder);
-        Log.e(tag, "masuk newView");
+
         return customListView;
     }
 
@@ -66,7 +66,7 @@ public class UserCursorAdapter extends CursorAdapter {
 
         String name = RepoTools.getString(cursor, UserDao.Properties.Name.columnName);
         String profpic = RepoTools.getString(cursor, UserDao.Properties.Url_prof_pic.columnName);
-        Log.e(tag, name);
+
         holder.user.setText(name);
         Glide.with(context).load(profpic).transform(new RoundImage(context)).into(holder.imageUser);
     }

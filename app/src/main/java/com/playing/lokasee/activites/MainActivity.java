@@ -30,25 +30,24 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.parse.ParseException;
-import com.parse.ParseObject;
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
-import com.playing.lokasee.events.UpdateLocationEvent;
 import com.playing.lokasee.fragments.SearchFragment;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.MarkerHelper;
-import com.playing.lokasee.helper.ParseHelper;
 import com.playing.lokasee.helper.UserData;
+import com.playing.lokasee.presenter.MainPresenter;
 import com.playing.lokasee.repositories.UserRepository;
 import com.playing.lokasee.tools.RoundImage;
 import com.squareup.otto.Subscribe;
+
 import java.util.Hashtable;
 import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MainActivity extends BaseActivity implements OnMapReadyCallback {
+public class MainActivity extends NucleusBaseActivity<MainPresenter> implements OnMapReadyCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -58,12 +57,12 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     @Bind(R.id.txt_name_side) TextView profileName;
 
     private MaterialMenuView materialMenu;
+    private TextView title;
+
     private GoogleMap googleMap;
     private Marker myMarker;
     private Hashtable<String, Marker> markers;
-    private double lat;
-    private double lon;
-    TextView title;
+
     SearchFragment sf;
     SearchFragment searchFrag;
     Boolean flagSearch = false;
@@ -127,9 +126,18 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
         materialMenu = ButterKnife.findById(actionbar, R.id.menuIcon);
         materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
+        materialMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (drawerLayout.isDrawerOpen(sideDrawer)) {
+                    drawerLayout.closeDrawer(sideDrawer);
+                } else {
+                    drawerLayout.openDrawer(sideDrawer);
+                }
+            }
+        });
 
         searchView = ButterKnife.findById(actionbar, R.id.action_testsearch);
-
         searchView.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,17 +153,14 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                 Log.e(TAG, "search listener");
             }
         });
-
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
                 closeActionBar();
-                Log.e(TAG, "close listener");
                 return false;
             }
         });
-
-        SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -163,8 +168,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-
-                if(flagSearch == true){
+                if (flagSearch == true) {
                     getFragmentManager().beginTransaction().remove(searchFrag).commit();
                 }
 
@@ -177,18 +181,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                 getFragmentManager().beginTransaction().replace(R.id.frameLayout, searchFrag).commit();
                 return false;
             }
-        };
-        searchView.setOnQueryTextListener(queryTextListener);
-
-        materialMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (drawerLayout.isDrawerOpen(sideDrawer)) {
-                    drawerLayout.closeDrawer(sideDrawer);
-                } else {
-                    drawerLayout.openDrawer(sideDrawer);
-                }
-            }
         });
 
         return actionbar;
@@ -196,7 +188,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
     private void setUpMarker() {
         markerOptions = new MarkerOptions();
-        marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_marker, null);
+        marker = LayoutInflater.from(getApplicationContext()).inflate(R.layout.custom_marker, null);
         linMarker = ButterKnife.findById(marker, R.id.lin_custom_marker);
         imgProf = ButterKnife.findById(marker, R.id.prof_img);
     }
@@ -208,7 +200,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         setUpMarker();
 
         setMyLocation(UserData.getLatitude(), UserData.getLongitude(), UserData.getName());
-        retrieveMarkers();
     }
 
     private void setMyLocation(double latitude, double longitude, String name) {
@@ -230,20 +221,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         }
     }
 
-    private void retrieveMarkers() {
-        ParseHelper.getInstance().getAllUser(new ParseHelper.OnParseQueryListener() {
-            @Override
-            public void onParseQuery(List<ParseObject> parseObjectList) {
-                updateMarker();
-            }
-
-            @Override
-            public void onError(ParseException pe) {
-                Log.e(TAG, "parse query user exception: " + pe.getMessage());
-            }
-        });
-    }
-
     private void createMarker(final LatLng latLng, final String name, final String objId, final String uriPhoto) {
         Glide.with(getApplicationContext()).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
             @Override
@@ -262,7 +239,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                     Marker userMarker = googleMap.addMarker(markerOptions);
                     markers.put(objId, userMarker);
                 }
-
             }
         });
     }
@@ -304,7 +280,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         }
     }
 
-    private void updateMarker() {
+    public void updateMarker() {
         List<User> users = UserRepository.getAll();
         if (users == null) {
             return;
@@ -339,20 +315,18 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         FragmentTransaction ft1 = fm1.beginTransaction();
         sf = (SearchFragment) fm1.findFragmentByTag("tag");
         ft1.remove(sf);
-        if (flagSearch == true)
+        if (flagSearch == true) {
             ft1.remove(searchFrag);
+        }
         ft1.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
         ft1.commit();
     }
 
-    @Subscribe
-    public void onUpdateLocation(UpdateLocationEvent updateLocationEvent) {
-        if (updateLocationEvent.location != null) {
+    public void onUpdateLocation(Location location) {
+        if (location != null) {
             if (googleMap != null && markers != null) {
                 // Reset count location
                 i = 0;
-                Location location = updateLocationEvent.location;
-                retrieveMarkers();
                 setMyLocation(location.getLatitude(), location.getLongitude(), null);
             }
         }
