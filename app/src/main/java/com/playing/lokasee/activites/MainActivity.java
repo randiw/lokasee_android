@@ -136,9 +136,14 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
             public void onClick(View v) {
                 if (drawerLayout.isDrawerOpen(sideDrawer)) {
                     drawerLayout.closeDrawer(sideDrawer);
+                    searchView.setVisibility(View.VISIBLE);
                 } else {
-                    closeActionBar(2);
-                    drawerLayout.openDrawer(sideDrawer);
+                    if(!searchView.isIconified()) {
+                        closeActionBar(2);
+                    } else {
+                        drawerLayout.openDrawer(sideDrawer);
+                        searchView.setVisibility(View.GONE);
+                    }
                 }
             }
         });
@@ -296,7 +301,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
             materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
             title.setVisibility(View.VISIBLE);
         } else {
-            materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
+            materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
             title.setVisibility(View.VISIBLE);
             searchView.setIconified(true);
         }
