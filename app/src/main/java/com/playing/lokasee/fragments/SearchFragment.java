@@ -29,7 +29,8 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
 
     private static final int LIST_ID = 11;
 
-    private String name;
+    private String name = null;
+    private String selection = null;
     private UserCursorAdapter adapter;
 
     @Override
@@ -52,16 +53,6 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
                 BusProvider.getInstance().post(user);
             }
         });
-
-        Bundle searchName = this.getArguments();
-        if (searchName == null) {
-            Log.d(TAG, "null");
-            name = "";
-        } else {
-            Log.d(TAG, "Search name: " + searchName.getString("searchName"));
-            name = searchName.getString("searchName");
-            getLoaderManager().restartLoader(LIST_ID, null, SearchFragment.this);
-        }
         getLoaderManager().initLoader(LIST_ID, null, SearchFragment.this);
         return rootView;
     }
@@ -69,9 +60,8 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (LIST_ID == id) {
-            String selection = null;
-            if (!name.equals("")) {
-                selection = UserDao.Properties.Name.columnName + " like '%" + name + "%'";
+            if(name == null){
+                selection = null;
             }
             return new CursorLoader(getActivity(), UserContentProvider.CONTENT_URI, null, selection, null, null);
         }
@@ -92,5 +82,11 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
             adapter.swapCursor(null);
             adapter.notifyDataSetChanged();
         }
+    }
+
+    public void search(String key){
+        name=key;
+        selection = UserDao.Properties.Name.columnName + " like '%" + name + "%'";
+        getLoaderManager().restartLoader(LIST_ID, null, SearchFragment.this);
     }
 }

@@ -94,6 +94,8 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         super.onCreate(savedInstanceState);
         setupLayout(R.layout.activity_main);
 
+        searchFrag = new SearchFragment();
+
         Glide.with(getApplicationContext()).load(UserData.getFacebookProfilePicUrl()).transform(new RoundImage(getApplicationContext())).into(profilePicture);
         profileName.setText(UserData.getName());
 
@@ -159,7 +161,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
 
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();
-                ft.add(R.id.frameLayout, new SearchFragment(), "tag");
+                ft.add(R.id.frameLayout, searchFrag, "tag");
                 ft.setTransition(ft.TRANSIT_FRAGMENT_OPEN);
                 ft.addToBackStack(null);
                 ft.commit();
@@ -181,17 +183,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (flagSearch == true) {
-                    getFragmentManager().beginTransaction().remove(searchFrag).commit();
-                }
-
-                flagSearch = true;
-                Bundle bundle = new Bundle();
-                searchFrag = new SearchFragment();
-                bundle.putString("searchName", newText);
-                searchFrag.setArguments(bundle);
-
-                getFragmentManager().beginTransaction().replace(R.id.frameLayout, searchFrag).commit();
+                searchFrag.search(newText);
                 return false;
             }
         });
