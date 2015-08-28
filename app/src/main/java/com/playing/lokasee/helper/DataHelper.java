@@ -58,4 +58,8 @@ public class DataHelper {
         int value = sharedPreferences.getInt(key, 0);
         return value;
     }
+
+    public static void clearData(){
+        sharedPreferences.edit().clear();
+    }
 }
