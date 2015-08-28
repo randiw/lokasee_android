@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.SearchView;
 
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
@@ -23,15 +24,19 @@ import com.playing.lokasee.view.adapter.UserCursorAdapter;
 /**
  * Created by nabilla on 8/27/15.
  */
-public class SearchFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class SearchFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, SearchView.OnQueryTextListener {
 
     private static String TAG = SearchFragment.class.getSimpleName();
 
     private static final int LIST_ID = 11;
 
     private String name = null;
-    private String selection = null;
     private UserCursorAdapter adapter;
+
+    public static SearchFragment newInstance() {
+        SearchFragment searchFragment = new SearchFragment();
+        return searchFragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,8 +65,9 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (LIST_ID == id) {
-            if(name == null){
-                selection = null;
+            String selection = null;
+            if(name != null){
+                selection = UserDao.Properties.Name.columnName + " like '%" + name + "%'";
             }
             return new CursorLoader(getActivity(), UserContentProvider.CONTENT_URI, null, selection, null, null);
         }
@@ -84,9 +90,16 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
-    public void search(String key){
-        name=key;
-        selection = UserDao.Properties.Name.columnName + " like '%" + name + "%'";
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        Log.i(TAG, newText);
+        name = newText;
         getLoaderManager().restartLoader(LIST_ID, null, SearchFragment.this);
+        return false;
     }
 }

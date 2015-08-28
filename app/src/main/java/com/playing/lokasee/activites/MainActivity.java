@@ -83,7 +83,8 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         super.onCreate(savedInstanceState);
         setupLayout(R.layout.activity_main);
 
-        searchFrag = new SearchFragment();
+        searchFrag = SearchFragment.newInstance();
+        searchView.setOnQueryTextListener(searchFrag);
 
         Glide.with(getApplicationContext()).load(UserData.getFacebookProfilePicUrl()).transform(new RoundImage(getApplicationContext())).into(profilePicture);
         profileName.setText(UserData.getName());
@@ -136,6 +137,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
                 if (drawerLayout.isDrawerOpen(sideDrawer)) {
                     drawerLayout.closeDrawer(sideDrawer);
                 } else {
+                    closeActionBar(2);
                     drawerLayout.openDrawer(sideDrawer);
                 }
             }
@@ -160,19 +162,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
-                closeActionBar();
-                return false;
-            }
-        });
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                searchFrag.search(newText);
+                closeActionBar(1);
                 return false;
             }
         });
@@ -293,7 +283,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
             searchView.onActionViewCollapsed();
-            closeActionBar();
+            closeActionBar(1);
             
             LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
             CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
@@ -301,10 +291,19 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         }
     }
 
-    private void closeActionBar() {
-        materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
-        title.setVisibility(View.VISIBLE);
+    private void closeActionBar(int key) {
+        if(key == 1) {
+            materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
+            title.setVisibility(View.VISIBLE);
+        } else {
+            materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
+            title.setVisibility(View.VISIBLE);
+            searchView.setIconified(true);
+        }
+        removeFragment();
+    }
 
+    private void removeFragment() {
         FragmentManager fm1 = getFragmentManager();
         FragmentTransaction ft1 = fm1.beginTransaction();
         sf = (SearchFragment) fm1.findFragmentByTag("tag");
@@ -336,5 +335,19 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     protected void onPause() {
         super.onPause();
         BusProvider.getInstance().unregister(this);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(drawerLayout.isDrawerOpen(sideDrawer)) {
+            drawerLayout.closeDrawer(sideDrawer);
+            materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
+        }
+        if(!searchView.isIconified()) {
+            removeFragment();
+            searchView.setIconified(true);
+        }
+        else
+            super.onBackPressed();
     }
 }
