@@ -3,6 +3,7 @@ package com.playing.lokasee.activites;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -21,6 +23,7 @@ import com.balysv.materialmenu.MaterialMenuView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -47,6 +50,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import nucleus.factory.RequiresPresenter;
 
 @RequiresPresenter(MainPresenter.class)
@@ -255,7 +259,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
                     recursiveMarker(users, true, null, null, null);
                 }
             }
-        }else{
+        } else {
 
             loadImage(null, urlPhoto, nameCurrent, locCurent, null);
         }
@@ -341,6 +345,14 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
                 setMyLocation(location.getLatitude(), location.getLongitude(), null);
             }
         }
+    }
+
+    @OnClick(R.id.rel_logout)
+    public void logOut() {
+        LoginManager.getInstance().logOut();
+        UserData.clearUserData();
+        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        finish();
     }
 
     @Override
