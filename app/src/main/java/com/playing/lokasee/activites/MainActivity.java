@@ -25,6 +25,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -53,10 +54,14 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
-    @Bind(R.id.side_drawer) LinearLayout sideDrawer;
-    @Bind(R.id.img_prof_side) ImageView profilePicture;
-    @Bind(R.id.txt_name_side) TextView profileName;
+    @Bind(R.id.drawer_layout)
+    DrawerLayout drawerLayout;
+    @Bind(R.id.side_drawer)
+    LinearLayout sideDrawer;
+    @Bind(R.id.img_prof_side)
+    ImageView profilePicture;
+    @Bind(R.id.txt_name_side)
+    TextView profileName;
 
     private MaterialMenuView materialMenu;
     private TextView title;
@@ -65,10 +70,10 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     private Marker myMarker;
     private Hashtable<String, Marker> markers;
 
-    SearchFragment sf;
-    SearchFragment searchFrag;
-    Boolean flagSearch = false;
-    SearchView searchView;
+    private SearchFragment sf;
+    private SearchFragment searchFrag;
+    private Boolean flagSearch = false;
+    private SearchView searchView;
 
     private View marker;
     private LinearLayout linMarker;
@@ -76,6 +81,8 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     private MarkerOptions markerOptions;
 
     private int i = 0;
+
+    private BitmapDescriptor bmpMarker;
 
 
     @Override
@@ -210,9 +217,10 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
             float zoom = 14.0f;
 
             if (myMarker == null) {
-                createMarker(position, name, null, UserData.getFacebookProfilePicUrl());
+                recursiveMarker(null, false, position, name, UserData.getFacebookProfilePicUrl());
             } else {
                 myMarker.setPosition(position);
+                Log.d(TAG, "Update one marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
             }
 
             if (googleMap.getCameraPosition().zoom < zoom) {
@@ -223,63 +231,64 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         }
     }
 
-    private void createMarker(final LatLng latLng, final String name, final String objId, final String uriPhoto) {
+    private void recursiveMarker(final List<User> users, boolean isRecursive, LatLng locCurent, String nameCurrent, String urlPhoto) {
+
+        if (isRecursive) {
+            if (i < users.size()) {
+
+                String uriPhoto = users.get(i).getUrl_prof_pic();
+                final String name = users.get(i).getName();
+                final String objId = users.get(i).getObject_id();
+                final LatLng position = new LatLng(users.get(i).getLatitude(), users.get(i).getLongitude());
+
+                if (!markers.containsKey(objId)) {
+
+                    loadImage(users, uriPhoto, name, position, objId);
+
+                } else {
+                    Log.d(TAG, "Update many marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
+
+                    Marker userMarker = markers.get(objId);
+                    userMarker.setPosition(position);
+
+                    i++;
+                    recursiveMarker(users, true, null, null, null);
+                }
+            }
+        }else{
+
+            loadImage(null, urlPhoto, nameCurrent, locCurent, null);
+        }
+    }
+
+
+    private void loadImage(final List<User> users, String uriPhoto, final String name, final LatLng position, final String objId) {
         Glide.with(getApplicationContext()).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
             @Override
             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                 super.onResourceReady(resource, glideAnimation);
 
+                bmpMarker = BitmapDescriptorFactory.fromBitmap(MarkerHelper.getBitmapFromView(linMarker, MainActivity.this));
                 imgProf.setImageBitmap(resource);
+                markerOptions.position(position).title(name).icon(bmpMarker);
 
-                // if image already downloaded then draw marker using custom view
-                markerOptions.position(latLng).title(name).icon(BitmapDescriptorFactory.fromBitmap(MarkerHelper.getBitmapFromView(linMarker, MainActivity.this)));
-                Log.d(TAG, "Create marker " + name + " latitude: " + latLng.latitude + " longitude: " + latLng.longitude);
-
-                if (objId == null) {
-                    myMarker = googleMap.addMarker(markerOptions);
-                } else {
+                if (objId != null) {
+                    // if image already downloaded then draw marker using custom view
                     Marker userMarker = googleMap.addMarker(markerOptions);
                     markers.put(objId, userMarker);
+                    Log.d(TAG, "Create many marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
+
+                    i++;
+                    recursiveMarker(users, true, null, null, null);
+
+                } else {
+                    myMarker = googleMap.addMarker(markerOptions);
+                    Log.d(TAG, "Create one marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
+
                 }
             }
         });
-    }
 
-    private void recursiveMarker(final List<User> users) {
-        if (i < users.size()) {
-            final String name = users.get(i).getName();
-            final String objId = users.get(i).getObject_id();
-            String uriPhoto = users.get(i).getUrl_prof_pic();
-            final LatLng position = new LatLng(users.get(i).getLatitude(), users.get(i).getLongitude());
-
-            if (!markers.containsKey(objId)) {
-                Glide.with(getApplicationContext()).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
-                    @Override
-                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                        super.onResourceReady(resource, glideAnimation);
-                        imgProf.setImageBitmap(resource);
-
-                        // if image already downloaded then draw marker using custom view
-                        markerOptions.position(position).title(name).icon(BitmapDescriptorFactory.fromBitmap(MarkerHelper.getBitmapFromView(linMarker, MainActivity.this)));
-                        Log.d(TAG, "Create marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
-
-                        Marker userMarker = googleMap.addMarker(markerOptions);
-                        markers.put(objId, userMarker);
-
-                        i++;
-                        recursiveMarker(users);
-                    }
-                });
-            } else {
-                Log.d(TAG, "Update marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
-
-                Marker userMarker = markers.get(objId);
-                userMarker.setPosition(position);
-
-                i++;
-                recursiveMarker(users);
-            }
-        }
     }
 
     public void updateMarker() {
@@ -291,18 +300,18 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         if (markers == null) {
             markers = new Hashtable<>();
         }
-       recursiveMarker(users);
+        recursiveMarker(users, true, null, null, null);
     }
 
     @Subscribe
-    public void getUserMapLocation(User user){
-        if(user != null) {
+    public void getUserMapLocation(User user) {
+        if (user != null) {
             searchView.isIconfiedByDefault();
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
             searchView.onActionViewCollapsed();
             closeActionBar();
-            
+
             LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
             CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
             googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
