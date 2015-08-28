@@ -21,7 +21,7 @@ public abstract class BasePresenter<T extends NucleusBaseActivity> extends RxPre
     private Context context;
 
     private enum Alarm {
-        SHORT(TimeUnit.MINUTES, 1),
+        SHORT(TimeUnit.SECONDS, 3),
         LONG(TimeUnit.HOURS, 1);
 
         private TimeUnit timeUnit;

@@ -176,6 +176,9 @@ public class ParseHelper {
                 }
             });
         } else {
+
+            Log.i(TAG, "UserLocation" + userLocation);
+
             userLocation.put(UserDao.TABLENAME.toLowerCase(), currentUser);
             userLocation.put(UserDao.Properties.Name.name, currentUser.get(UserDao.Properties.Name.name));
             userLocation.put(UserDao.Properties.Facebook_id.name, currentUser.get(UserDao.Properties.Facebook_id.name));
