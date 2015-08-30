@@ -18,18 +18,22 @@ import com.playing.lokasee.R;
 import com.playing.lokasee.User;
 import com.playing.lokasee.UserDao;
 import com.playing.lokasee.helper.BusProvider;
+import com.playing.lokasee.presenter.SearchPresenter;
 import com.playing.lokasee.repositories.provider.UserContentProvider;
 import com.playing.lokasee.view.adapter.UserCursorAdapter;
+
+import nucleus.factory.RequiresPresenter;
 
 /**
  * Created by nabilla on 8/27/15.
  */
-public class SearchFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, SearchView.OnQueryTextListener {
+@RequiresPresenter(SearchPresenter.class)
+public class SearchFragment extends NucleusBaseFragment<SearchPresenter> implements LoaderManager.LoaderCallbacks<Cursor>, SearchView.OnQueryTextListener {
 
     private static String TAG = SearchFragment.class.getSimpleName();
-
     private static final int LIST_ID = 11;
 
+    private ListView listviewUser;
     private String name = null;
     private UserCursorAdapter adapter;
 
@@ -47,7 +51,7 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search, container, false);
 
-        ListView listviewUser = (ListView) rootView.findViewById(R.id.listUser);
+        listviewUser = (ListView) rootView.findViewById(R.id.listUser);
 
         adapter = new UserCursorAdapter(getActivity());
         listviewUser.setAdapter(adapter);
@@ -60,6 +64,11 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         });
         getLoaderManager().initLoader(LIST_ID, null, SearchFragment.this);
         return rootView;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedStateInstance) {
+
     }
 
     @Override
