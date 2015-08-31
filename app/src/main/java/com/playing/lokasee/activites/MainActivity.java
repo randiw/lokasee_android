@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -37,13 +36,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
 import com.playing.lokasee.fragments.SearchFragment;
-import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.MarkerHelper;
 import com.playing.lokasee.helper.UserData;
 import com.playing.lokasee.presenter.MainPresenter;
 import com.playing.lokasee.repositories.UserRepository;
 import com.playing.lokasee.tools.RoundImage;
-import com.squareup.otto.Subscribe;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -58,14 +55,10 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    @Bind(R.id.drawer_layout)
-    DrawerLayout drawerLayout;
-    @Bind(R.id.side_drawer)
-    LinearLayout sideDrawer;
-    @Bind(R.id.img_prof_side)
-    ImageView profilePicture;
-    @Bind(R.id.txt_name_side)
-    TextView profileName;
+    @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
+    @Bind(R.id.side_drawer) LinearLayout sideDrawer;
+    @Bind(R.id.img_prof_side) ImageView profilePicture;
+    @Bind(R.id.txt_name_side) TextView profileName;
 
     private MaterialMenuView materialMenu;
     private TextView title;
@@ -86,15 +79,14 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
 
     private int i = 0;
 
-    private BitmapDescriptor bmpMarker;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupLayout(R.layout.activity_main);
 
-        searchFrag = new SearchFragment();
+        searchFrag = SearchFragment.newInstance();
+        searchView.setOnQueryTextListener(searchFrag);
 
         Glide.with(getApplicationContext()).load(UserData.getFacebookProfilePicUrl()).transform(new RoundImage(getApplicationContext())).into(profilePicture);
         profileName.setText(UserData.getName());
@@ -146,8 +138,14 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
             public void onClick(View v) {
                 if (drawerLayout.isDrawerOpen(sideDrawer)) {
                     drawerLayout.closeDrawer(sideDrawer);
+                    searchView.setVisibility(View.VISIBLE);
                 } else {
-                    drawerLayout.openDrawer(sideDrawer);
+                    if (!searchView.isIconified()) {
+                        closeActionBar();
+                    } else {
+                        drawerLayout.openDrawer(sideDrawer);
+                        searchView.setVisibility(View.GONE);
+                    }
                 }
             }
         });
@@ -175,18 +173,6 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
                 return false;
             }
         });
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                searchFrag.search(newText);
-                return false;
-            }
-        });
 
         return actionbar;
     }
@@ -201,9 +187,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
-
         setUpMarker();
-
         setMyLocation(UserData.getLatitude(), UserData.getLongitude(), UserData.getName());
     }
 
@@ -228,19 +212,15 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     }
 
     private void recursiveMarker(final List<User> users, boolean isRecursive, LatLng locCurent, String nameCurrent, String urlPhoto) {
-
         if (isRecursive) {
             if (i < users.size()) {
-
                 String uriPhoto = users.get(i).getUrl_prof_pic();
                 final String name = users.get(i).getName();
                 final String objId = users.get(i).getObject_id();
                 final LatLng position = new LatLng(users.get(i).getLatitude(), users.get(i).getLongitude());
 
                 if (!markers.containsKey(objId)) {
-
                     loadImage(users, uriPhoto, name, position, objId);
-
                 } else {
                     Log.d(TAG, "Update many marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
 
@@ -252,11 +232,9 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
                 }
             }
         } else {
-
             loadImage(null, urlPhoto, nameCurrent, locCurent, null);
         }
     }
-
 
     private void loadImage(final List<User> users, String uriPhoto, final String name, final LatLng position, final String objId) {
         Glide.with(getApplicationContext()).load(uriPhoto).asBitmap().into(new BitmapImageViewTarget(imgProf) {
@@ -264,9 +242,9 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                 super.onResourceReady(resource, glideAnimation);
 
-                bmpMarker = BitmapDescriptorFactory.fromBitmap(MarkerHelper.getBitmapFromView(linMarker, MainActivity.this));
+                BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(MarkerHelper.getBitmapFromView(linMarker, MainActivity.this));
                 imgProf.setImageBitmap(resource);
-                markerOptions.position(position).title(name).icon(bmpMarker);
+                markerOptions.position(position).title(name).icon(bitmapDescriptor);
 
                 if (objId != null) {
                     // if image already downloaded then draw marker using custom view
@@ -276,15 +254,12 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
 
                     i++;
                     recursiveMarker(users, true, null, null, null);
-
                 } else {
                     myMarker = googleMap.addMarker(markerOptions);
                     Log.d(TAG, "Create one marker " + name + " latitude: " + position.latitude + " longitude: " + position.longitude);
-
                 }
             }
         });
-
     }
 
     public void updateMarker() {
@@ -299,25 +274,24 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         recursiveMarker(users, true, null, null, null);
     }
 
-    @Subscribe
-    public void getUserMapLocation(User user) {
-        if (user != null) {
-            searchView.isIconfiedByDefault();
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-            searchView.onActionViewCollapsed();
-            closeActionBar();
-
-            LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
-            CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
-            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        }
-    }
-
     private void closeActionBar() {
         materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
         title.setVisibility(View.VISIBLE);
 
+        searchView.isIconfiedByDefault();
+        searchView.onActionViewCollapsed();
+        searchView.setQuery("", false);
+
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+
+        removeFragment();
+    }
+
+    private void removeFragment() {
         FragmentManager fm1 = getFragmentManager();
         FragmentTransaction ft1 = fm1.beginTransaction();
         sf = (SearchFragment) fm1.findFragmentByTag("tag");
@@ -327,6 +301,16 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         }
         ft1.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
         ft1.commit();
+    }
+
+    public void getUserMapLocation(User user) {
+        if (user != null) {
+            closeActionBar();
+
+            LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
+            CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        }
     }
 
     public void onUpdateLocation(Location location) {
@@ -348,14 +332,15 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        BusProvider.getInstance().register(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        BusProvider.getInstance().unregister(this);
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(sideDrawer)) {
+            drawerLayout.closeDrawer(sideDrawer);
+            materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
+        }
+        if (!searchView.isIconified()) {
+            closeActionBar();
+        } else {
+            super.onBackPressed();
+        }
     }
 }

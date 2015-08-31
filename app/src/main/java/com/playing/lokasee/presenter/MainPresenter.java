@@ -3,9 +3,14 @@ package com.playing.lokasee.presenter;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.playing.lokasee.User;
 import com.playing.lokasee.activites.MainActivity;
+import com.playing.lokasee.events.ReturnSearchEvent;
 import com.playing.lokasee.events.UpdateLocationEvent;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.ParseHelper;
@@ -39,6 +44,13 @@ public class MainPresenter extends BasePresenter<MainActivity> {
         if (updateLocationEvent.location != null) {
             getView().onUpdateLocation(updateLocationEvent.location);
             retrieveMarkers();
+        }
+    }
+
+    @Subscribe
+    public void onReturnSearchEvent(ReturnSearchEvent returnSearchEvent){
+        if(returnSearchEvent != null) {
+            getView().getUserMapLocation(returnSearchEvent.user);
         }
     }
 
