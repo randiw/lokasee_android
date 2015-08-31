@@ -10,6 +10,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.playing.lokasee.User;
 import com.playing.lokasee.activites.MainActivity;
+import com.playing.lokasee.events.ReturnSearchEvent;
 import com.playing.lokasee.events.UpdateLocationEvent;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.ParseHelper;
@@ -47,9 +48,9 @@ public class MainPresenter extends BasePresenter<MainActivity> {
     }
 
     @Subscribe
-    public void getUserMapLocation(User user){
-        if(user != null) {
-            getView().getUserMapLocation(user);
+    public void onReturnSearchEvent(ReturnSearchEvent returnSearchEvent){
+        if(returnSearchEvent != null) {
+            getView().getUserMapLocation(returnSearchEvent.user);
         }
     }
 

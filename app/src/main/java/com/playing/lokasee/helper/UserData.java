@@ -98,4 +98,9 @@ public class UserData {
 
         return isLogin;
     }
+
+    public static boolean clearUserData(){
+        DataHelper.clearData();
+        return DataHelper.getString(FACEBOOK_ID) == null;
+    }
 }

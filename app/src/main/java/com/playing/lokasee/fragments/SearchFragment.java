@@ -1,6 +1,5 @@
 package com.playing.lokasee.fragments;
 
-import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
@@ -10,18 +9,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
 import com.playing.lokasee.UserDao;
+import com.playing.lokasee.events.ReturnSearchEvent;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.presenter.SearchPresenter;
 import com.playing.lokasee.repositories.provider.UserContentProvider;
 import com.playing.lokasee.view.adapter.UserCursorAdapter;
 
+import butterknife.Bind;
+import butterknife.OnItemClick;
 import nucleus.factory.RequiresPresenter;
 
 /**
@@ -33,7 +34,8 @@ public class SearchFragment extends NucleusBaseFragment<SearchPresenter> impleme
     private static String TAG = SearchFragment.class.getSimpleName();
     private static final int LIST_ID = 11;
 
-    private ListView listviewUser;
+    @Bind(R.id.listUser) ListView listviewUser;
+
     private String name = null;
     private UserCursorAdapter adapter;
 
@@ -43,32 +45,23 @@ public class SearchFragment extends NucleusBaseFragment<SearchPresenter> impleme
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_search, container, false);
-
-        listviewUser = (ListView) rootView.findViewById(R.id.listUser);
-
-        adapter = new UserCursorAdapter(getActivity());
-        listviewUser.setAdapter(adapter);
-        listviewUser.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                User user = adapter.getItem(position);
-                BusProvider.getInstance().post(user);
-            }
-        });
-        getLoaderManager().initLoader(LIST_ID, null, SearchFragment.this);
-        return rootView;
+    protected View setupLayout(LayoutInflater inflater, ViewGroup container) {
+        View view = inflater.inflate(R.layout.fragment_search, container, false);
+        return view;
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedStateInstance) {
+        adapter = new UserCursorAdapter(getActivity());
+        listviewUser.setAdapter(adapter);
 
+        getLoaderManager().initLoader(LIST_ID, null, SearchFragment.this);
+    }
+
+    @OnItemClick(R.id.listUser)
+    public void onClickUser(int position) {
+        User user = adapter.getItem(position);
+        BusProvider.getInstance().post(new ReturnSearchEvent(user));
     }
 
     @Override
