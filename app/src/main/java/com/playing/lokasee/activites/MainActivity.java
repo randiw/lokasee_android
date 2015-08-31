@@ -133,14 +133,15 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         materialMenu = ButterKnife.findById(actionbar, R.id.menuIcon);
         materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
         materialMenu.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
                 if (drawerLayout.isDrawerOpen(sideDrawer)) {
                     drawerLayout.closeDrawer(sideDrawer);
                     searchView.setVisibility(View.VISIBLE);
                 } else {
-                    if(!searchView.isIconified()) {
-                        closeActionBar(2);
+                    if (!searchView.isIconified()) {
+                        closeActionBar();
                     } else {
                         drawerLayout.openDrawer(sideDrawer);
                         searchView.setVisibility(View.GONE);
@@ -168,7 +169,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
-                closeActionBar(1);
+                closeActionBar();
                 return false;
             }
         });
@@ -282,30 +283,20 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
        recursiveMarker(users);
     }
 
-    @Subscribe
-    public void getUserMapLocation(User user){
-        if(user != null) {
-            searchView.isIconfiedByDefault();
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-            searchView.onActionViewCollapsed();
-            closeActionBar(1);
-            
-            LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
-            CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
-            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        }
-    }
+    private void closeActionBar() {
+        materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
+        title.setVisibility(View.VISIBLE);
 
-    private void closeActionBar(int key) {
-        if(key == 1) {
-            materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
-            title.setVisibility(View.VISIBLE);
-        } else {
-            materialMenu.setState(MaterialMenuDrawable.IconState.BURGER);
-            title.setVisibility(View.VISIBLE);
-            searchView.setIconified(true);
+        searchView.isIconfiedByDefault();
+        searchView.onActionViewCollapsed();
+        searchView.setQuery("", false);
+
+        View view = this.getCurrentFocus();
+        if( view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+
         removeFragment();
     }
 
@@ -319,6 +310,16 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         }
         ft1.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
         ft1.commit();
+    }
+
+    public void getUserMapLocation(User user) {
+        if(user != null) {
+            closeActionBar();
+
+            LatLng userPos = new LatLng(user.getLatitude(), user.getLongitude());
+            CameraPosition cameraPosition = new CameraPosition.Builder().target(userPos).zoom(12).build();
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        }
     }
 
     public void onUpdateLocation(Location location) {
@@ -350,8 +351,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
             materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
         }
         if(!searchView.isIconified()) {
-            removeFragment();
-            searchView.setIconified(true);
+            closeActionBar();
         }
         else
             super.onBackPressed();
