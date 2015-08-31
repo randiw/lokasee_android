@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -56,7 +57,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     private static final String TAG = MainActivity.class.getSimpleName();
 
     @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
-    @Bind(R.id.side_drawer) LinearLayout sideDrawer;
+    @Bind(R.id.side_drawer) RelativeLayout sideDrawer;
     @Bind(R.id.img_prof_side) ImageView profilePicture;
     @Bind(R.id.txt_name_side) TextView profileName;
 
@@ -67,9 +68,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     private Marker myMarker;
     private Hashtable<String, Marker> markers;
 
-    private SearchFragment sf;
     private SearchFragment searchFrag;
-    private Boolean flagSearch = false;
     private SearchView searchView;
 
     private View marker;
@@ -294,11 +293,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     private void removeFragment() {
         FragmentManager fm1 = getFragmentManager();
         FragmentTransaction ft1 = fm1.beginTransaction();
-        sf = (SearchFragment) fm1.findFragmentByTag("tag");
-        ft1.remove(sf);
-        if (flagSearch == true) {
-            ft1.remove(searchFrag);
-        }
+        ft1.remove(searchFrag);
         ft1.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
         ft1.commit();
     }
