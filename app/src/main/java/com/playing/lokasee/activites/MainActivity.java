@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -61,7 +62,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     private static final String TAG = MainActivity.class.getSimpleName();
 
     @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
-    @Bind(R.id.side_drawer) LinearLayout sideDrawer;
+    @Bind(R.id.side_drawer) RelativeLayout sideDrawer;
     @Bind(R.id.img_prof_side) ImageView profilePicture;
     @Bind(R.id.txt_name_side) TextView profileName;
     @Bind(R.id.fragment_switcher) FragmentSwitcher fragmentSwitcher;
@@ -73,10 +74,8 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     private Marker myMarker;
     private Hashtable<String, Marker> markers;
 
-    SearchFragment sf;
-    SearchFragment searchFrag;
-    Boolean flagSearch = false;
-    SearchView searchView;
+    private SearchFragment searchFrag;
+    private SearchView searchView;
 
     private View marker;
     private LinearLayout linMarker;
@@ -85,17 +84,17 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
 
     private int i = 0;
     private FragmentStateArrayPagerAdapter fragmentAdapter;
+    List<NucleusBaseFragment> fragments;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupLayout(R.layout.activity_main);
 
-        searchFrag = SearchFragment.newInstance();
-        searchView.setOnQueryTextListener(searchFrag);
-
         fragmentAdapter = new FragmentStateArrayPagerAdapter(getSupportFragmentManager());
         fragmentSwitcher.setAdapter(fragmentAdapter);
+
+//        searchView.setOnQueryTextListener(new fragments.get(0));
 
         Glide.with(getApplicationContext()).load(UserData.getFacebookProfilePicUrl()).transform(new RoundImage(getApplicationContext())).into(profilePicture);
         profileName.setText(UserData.getName());
@@ -174,9 +173,12 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
 //                ft.addToBackStack(null);
 //                ft.commit();
 //                Log.e(TAG, "search listener");
-                List<NucleusFragment> fragments = new ArrayList<>();
-                fragments.add(SearchFragment.newInstance());
-                fragmentAdapter.addAll(fragments);
+                fragmentSwitcher.setCurrentItem(0);
+                fragments = new ArrayList<>();
+                if(fragments.isEmpty()) {
+                    fragments.add(SearchFragment.newInstance());
+                    fragmentAdapter.addAll(fragments);
+                }
             }
         });
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
@@ -323,7 +325,9 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
 //        }
 //        ft1.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
 //        ft1.commit();
-        fragmentAdapter.clear();
+
+        fragments.clear();
+        fragmentAdapter.notifyDataSetChanged();
     }
 
     public void getUserMapLocation(User user) {

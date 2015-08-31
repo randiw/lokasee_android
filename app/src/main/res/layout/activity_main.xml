@@ -7,8 +7,8 @@
         android:id="@+id/drawer_layout"
         style="@style/MatchParent">
 
-        <me.tabak.fragmentswitcher.FragmentSwitcher
-            android:id="@+id/fragment_switcher"
+        <FrameLayout
+            android:id="@+id/frameLayout"
             style="@style/MatchParent">
 
             <fragment
@@ -16,7 +16,11 @@
                 android:name="com.google.android.gms.maps.MapFragment"
                 style="@style/MatchParent" />
 
-        </me.tabak.fragmentswitcher.FragmentSwitcher>
+            <me.tabak.fragmentswitcher.FragmentSwitcher
+                android:id="@+id/fragment_switcher"
+                style="@style/MatchParent" />
+
+        </FrameLayout>
 
         <RelativeLayout
             android:id="@+id/side_drawer"
