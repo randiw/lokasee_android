@@ -6,7 +6,6 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,6 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     private static final int LIST_ID = 11;
 
     private String name = null;
-    private String selection = null;
     private UserCursorAdapter adapter;
 
     @Override
@@ -60,8 +58,9 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (LIST_ID == id) {
-            if(name == null){
-                selection = null;
+            String selection = null;
+            if (name != null) {
+                selection = UserDao.Properties.Name.columnName + " like '%" + name + "%'";
             }
             return new CursorLoader(getActivity(), UserContentProvider.CONTENT_URI, null, selection, null, null);
         }
@@ -84,9 +83,8 @@ public class SearchFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
-    public void search(String key){
-        name=key;
-        selection = UserDao.Properties.Name.columnName + " like '%" + name + "%'";
+    public void search(String key) {
+        name = key;
         getLoaderManager().restartLoader(LIST_ID, null, SearchFragment.this);
     }
 }
