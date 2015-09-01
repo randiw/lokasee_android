@@ -17,8 +17,8 @@ import rx.android.schedulers.AndroidSchedulers;
  */
 public class LocationManager {
 
-    private static final int NUM_UPDATES_INTERVAL = 5;
-    private static final int INTERVAL = 100;
+    private static final int NUM_UPDATES_INTERVAL = 1;
+    private static final long INTERVAL = TimeUnit.MINUTES.toMillis(5);
     private static final int LOCATION_TIMEOUT = 2;
 
 

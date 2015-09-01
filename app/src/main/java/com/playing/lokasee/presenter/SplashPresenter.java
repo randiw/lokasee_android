@@ -28,6 +28,7 @@ public class SplashPresenter extends BasePresenter<SplashActivity> {
 
     private static final int SPLASH_TIME = 3000;
     private static final int SPLASH_INTERVAL = 500;
+    private static boolean isRunning = false;
 
     @Override
     protected void onCreate(Bundle savedState) {
@@ -52,7 +53,9 @@ public class SplashPresenter extends BasePresenter<SplashActivity> {
         LocationManager.checkLocation(getContext()).subscribe(new Action1<Location>() {
             @Override
             public void call(Location location) {
-                if (location != null) {
+
+                if (location != null && !isRunning) {
+                    isRunning = true;
                     double lat = location.getLatitude();
                     double lon = location.getLongitude();
 
@@ -61,18 +64,20 @@ public class SplashPresenter extends BasePresenter<SplashActivity> {
                         ParseHelper.getInstance().saveMyLocation(lat, lon, new ParseHelper.OnSaveParseObjectListener() {
                             @Override
                             public void onSaveParseObject(ParseObject parseObject) {
-
+                                isRunning = false;
                             }
 
                             @Override
                             public void onError(ParseException pe) {
-
+                                isRunning = false;
                             }
                         });
                     }
                 } else {
                     Log.i(TAG, "location null");
                 }
+
+                Log.i(TAG, "retrieveLocation()");
             }
         }, new Action1<Throwable>() {
             @Override
