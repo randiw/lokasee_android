@@ -136,6 +136,7 @@ public class ParseHelper {
     }
 
     public void retrieveMyLocation(String facebookId, final OnParseQueryListener onParseQueryListener) {
+        Log.i(TAG, "retrieveMyLocation()");
         ParseQuery<ParseObject> locationQuery = new ParseQuery<ParseObject>(LOCATION);
         locationQuery.whereEqualTo(UserDao.Properties.Facebook_id.name, facebookId);
         locationQuery.findInBackground(new FindCallback<ParseObject>() {
@@ -159,23 +160,35 @@ public class ParseHelper {
     }
 
     public void saveMyLocation(final double latitude, final double longitude, final OnSaveParseObjectListener onSaveParseObjectListener) {
+        Log.i(TAG, "saveMyLocation()");
+
         if(currentUser == null) {
             currentUser = ParseUser.getCurrentUser();
+
+            Log.i(TAG, "Current user null");
         }
         if(userLocation == null) {
+
+            Log.i(TAG, "User location null");
+
             retrieveMyLocation(UserData.getFacebookId(), new OnParseQueryListener() {
                 @Override
                 public void onParseQuery(List<ParseObject> parseObjectList) {
+                    Log.i(TAG, "saveMyLocation() success");
                     saveMyLocation(latitude, longitude, onSaveParseObjectListener);
                 }
 
                 @Override
                 public void onError(ParseException pe) {
+                    Log.i(TAG, "saveMyLocation() error");
                     userLocation = new ParseObject(LOCATION);
                     saveMyLocation(latitude, longitude, onSaveParseObjectListener);
                 }
             });
         } else {
+
+            Log.i(TAG, "UserLocation not null" + userLocation);
+
             userLocation.put(UserDao.TABLENAME.toLowerCase(), currentUser);
             userLocation.put(UserDao.Properties.Name.name, currentUser.get(UserDao.Properties.Name.name));
             userLocation.put(UserDao.Properties.Facebook_id.name, currentUser.get(UserDao.Properties.Facebook_id.name));

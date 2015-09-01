@@ -30,7 +30,7 @@
                 <!--style="@style/MatchParent" />-->
         </FrameLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/side_drawer"
             style="@style/MatchParent"
             android:layout_width="240dp"
@@ -79,7 +79,7 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </RelativeLayout>
-        </RelativeLayout>
+        </LinearLayout>
 
 
     </android.support.v4.widget.DrawerLayout>
