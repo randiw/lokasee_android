@@ -16,10 +16,18 @@
                 android:name="com.google.android.gms.maps.MapFragment"
                 style="@style/MatchParent" />
 
-            <me.tabak.fragmentswitcher.FragmentSwitcher
-                android:id="@+id/fragment_switcher"
-                style="@style/MatchParent" />
-
+            <FrameLayout
+                android:id="@+id/frame_search"
+                style="@style/MatchParent">
+                <fragment
+                    android:id="@+id/fragment_search"
+                    style="@style/MatchParent"
+                    android:name="com.playing.lokasee.fragments.SearchFragment" />
+            </FrameLayout>
+                <!-- -->
+            <!--<me.tabak.fragmentswitcher.FragmentSwitcher-->
+                <!--android:id="@+id/fragment_switcher"-->
+                <!--style="@style/MatchParent" />-->
         </FrameLayout>
 
         <RelativeLayout

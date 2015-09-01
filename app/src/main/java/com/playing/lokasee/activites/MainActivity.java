@@ -1,8 +1,5 @@
 package com.playing.lokasee.activites;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -12,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -34,7 +32,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.playing.lokasee.R;
 import com.playing.lokasee.User;
-import com.playing.lokasee.fragments.NucleusBaseFragment;
 import com.playing.lokasee.fragments.SearchFragment;
 import com.playing.lokasee.helper.BusProvider;
 import com.playing.lokasee.helper.MarkerHelper;
@@ -42,19 +39,13 @@ import com.playing.lokasee.helper.UserData;
 import com.playing.lokasee.presenter.MainPresenter;
 import com.playing.lokasee.repositories.UserRepository;
 import com.playing.lokasee.tools.RoundImage;
-import com.squareup.otto.Subscribe;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import me.tabak.fragmentswitcher.FragmentStateArrayPagerAdapter;
-import me.tabak.fragmentswitcher.FragmentSwitcher;
 import nucleus.factory.RequiresPresenter;
-import nucleus.view.NucleusFragment;
 
 @RequiresPresenter(MainPresenter.class)
 public class MainActivity extends NucleusBaseActivity<MainPresenter> implements OnMapReadyCallback {
@@ -65,7 +56,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     @Bind(R.id.side_drawer) RelativeLayout sideDrawer;
     @Bind(R.id.img_prof_side) ImageView profilePicture;
     @Bind(R.id.txt_name_side) TextView profileName;
-    @Bind(R.id.fragment_switcher) FragmentSwitcher fragmentSwitcher;
+    @Bind(R.id.frame_search) FrameLayout frameSearch;
 
     private MaterialMenuView materialMenu;
     private TextView title;
@@ -74,27 +65,26 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     private Marker myMarker;
     private Hashtable<String, Marker> markers;
 
-    private SearchFragment searchFrag;
-    private SearchView searchView;
+    SearchFragment searchFragment;
 
+    private SearchView searchView;
     private View marker;
     private LinearLayout linMarker;
     private ImageView imgProf;
     private MarkerOptions markerOptions;
 
     private int i = 0;
-    private FragmentStateArrayPagerAdapter fragmentAdapter;
-    List<NucleusBaseFragment> fragments;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupLayout(R.layout.activity_main);
 
-        fragmentAdapter = new FragmentStateArrayPagerAdapter(getSupportFragmentManager());
-        fragmentSwitcher.setAdapter(fragmentAdapter);
+        searchFragment = (SearchFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_search);
 
-//        searchView.setOnQueryTextListener(new fragments.get(0));
+        frameSearch.setVisibility(View.GONE);
+
+        searchView.setOnQueryTextListener(searchFragment);
 
         Glide.with(getApplicationContext()).load(UserData.getFacebookProfilePicUrl()).transform(new RoundImage(getApplicationContext())).into(profilePicture);
         profileName.setText(UserData.getName());
@@ -166,19 +156,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
                 materialMenu.setState(MaterialMenuDrawable.IconState.ARROW);
                 title.setVisibility(View.GONE);
 
-//                FragmentManager fm = getFragmentManager();
-//                FragmentTransaction ft = fm.beginTransaction();
-//                ft.add(R.id.frameLayout, searchFrag, "tag");
-//                ft.setTransition(ft.TRANSIT_FRAGMENT_OPEN);
-//                ft.addToBackStack(null);
-//                ft.commit();
-//                Log.e(TAG, "search listener");
-                fragmentSwitcher.setCurrentItem(0);
-                fragments = new ArrayList<>();
-                if(fragments.isEmpty()) {
-                    fragments.add(SearchFragment.newInstance());
-                    fragmentAdapter.addAll(fragments);
-                }
+                frameSearch.setVisibility(View.VISIBLE);
             }
         });
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
@@ -312,22 +290,13 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
 
-        removeFragment();
+        hideFragment();
     }
 
-    private void removeFragment() {
-//        FragmentManager fm1 = getFragmentManager();
-//        FragmentTransaction ft1 = fm1.beginTransaction();
-//        sf = (SearchFragment) fm1.findFragmentByTag("tag");
-//        ft1.remove(sf);
-//        if (flagSearch == true) {
-//            ft1.remove(searchFrag);
-//        }
-//        ft1.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-//        ft1.commit();
-
-        fragments.clear();
-        fragmentAdapter.notifyDataSetChanged();
+    private void hideFragment() {
+        if(frameSearch.getVisibility() == View.VISIBLE) {
+            frameSearch.setVisibility(View.GONE);
+        }
     }
 
     public void getUserMapLocation(User user) {

@@ -45,6 +45,13 @@ public class SearchFragment extends NucleusBaseFragment<SearchPresenter> impleme
         return searchFragment;
     }
 
+    public SearchFragment(){}
+
+    @Override
+    public void onCreate(Bundle savedState) {
+        super.onCreate(savedState);
+    }
+
     @Override
     protected View setupLayout(LayoutInflater inflater, ViewGroup container) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
@@ -52,7 +59,8 @@ public class SearchFragment extends NucleusBaseFragment<SearchPresenter> impleme
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedStateInstance) {
+    public void onActivityCreated(Bundle savedStateInstance) {
+        super.onActivityCreated(savedStateInstance);
         adapter = new UserCursorAdapter(getActivity());
         listviewUser.setAdapter(adapter);
 
