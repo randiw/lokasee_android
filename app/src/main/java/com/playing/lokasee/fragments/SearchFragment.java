@@ -40,13 +40,6 @@ public class SearchFragment extends NucleusBaseFragment<SearchPresenter> impleme
     private String name = null;
     private UserCursorAdapter adapter;
 
-    public static SearchFragment newInstance() {
-        SearchFragment searchFragment = new SearchFragment();
-        return searchFragment;
-    }
-
-    public SearchFragment(){}
-
     @Override
     public void onCreate(Bundle savedState) {
         super.onCreate(savedState);

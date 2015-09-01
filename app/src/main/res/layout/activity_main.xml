@@ -24,13 +24,9 @@
                     style="@style/MatchParent"
                     android:name="com.playing.lokasee.fragments.SearchFragment" />
             </FrameLayout>
-                <!-- -->
-            <!--<me.tabak.fragmentswitcher.FragmentSwitcher-->
-                <!--android:id="@+id/fragment_switcher"-->
-                <!--style="@style/MatchParent" />-->
         </FrameLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/side_drawer"
             style="@style/MatchParent"
             android:layout_width="240dp"
@@ -79,7 +75,7 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </RelativeLayout>
-        </LinearLayout>
+        </RelativeLayout>
 
 
     </android.support.v4.widget.DrawerLayout>
