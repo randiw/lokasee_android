@@ -16,9 +16,17 @@
                 android:name="com.google.android.gms.maps.MapFragment"
                 style="@style/MatchParent" />
 
+            <FrameLayout
+                android:id="@+id/frame_search"
+                style="@style/MatchParent">
+                <fragment
+                    android:id="@+id/fragment_search"
+                    style="@style/MatchParent"
+                    android:name="com.playing.lokasee.fragments.SearchFragment" />
+            </FrameLayout>
         </FrameLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/side_drawer"
             style="@style/MatchParent"
             android:layout_width="240dp"
@@ -67,7 +75,7 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
             </RelativeLayout>
-        </LinearLayout>
+        </RelativeLayout>
 
 
     </android.support.v4.widget.DrawerLayout>

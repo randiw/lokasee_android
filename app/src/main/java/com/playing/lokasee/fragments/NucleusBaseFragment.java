@@ -9,11 +9,12 @@ import com.playing.lokasee.presenter.BasePresenterFragment;
 
 import butterknife.ButterKnife;
 import nucleus.view.NucleusFragment;
+import nucleus.view.NucleusSupportFragment;
 
 /**
  * Created by bils on 8/30/2015.
  */
-public abstract class NucleusBaseFragment<T extends BasePresenterFragment> extends NucleusFragment<T> {
+public abstract class NucleusBaseFragment<T extends BasePresenterFragment> extends NucleusSupportFragment<T> {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -29,4 +30,7 @@ public abstract class NucleusBaseFragment<T extends BasePresenterFragment> exten
         super.onDestroyView();
         ButterKnife.unbind(this);
     }
+
+
+
 }

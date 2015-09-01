@@ -1,10 +1,11 @@
 package com.playing.lokasee.fragments;
 
-import android.app.LoaderManager;
-import android.content.CursorLoader;
-import android.content.Loader;
+
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,9 +40,9 @@ public class SearchFragment extends NucleusBaseFragment<SearchPresenter> impleme
     private String name = null;
     private UserCursorAdapter adapter;
 
-    public static SearchFragment newInstance() {
-        SearchFragment searchFragment = new SearchFragment();
-        return searchFragment;
+    @Override
+    public void onCreate(Bundle savedState) {
+        super.onCreate(savedState);
     }
 
     @Override
@@ -51,7 +52,8 @@ public class SearchFragment extends NucleusBaseFragment<SearchPresenter> impleme
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedStateInstance) {
+    public void onActivityCreated(Bundle savedStateInstance) {
+        super.onActivityCreated(savedStateInstance);
         adapter = new UserCursorAdapter(getActivity());
         listviewUser.setAdapter(adapter);
 
