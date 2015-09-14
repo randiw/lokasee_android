@@ -19,64 +19,22 @@
             <FrameLayout
                 android:id="@+id/frame_search"
                 style="@style/MatchParent">
+
                 <fragment
                     android:id="@+id/fragment_search"
-                    style="@style/MatchParent"
-                    android:name="com.playing.lokasee.fragments.SearchFragment" />
+                    android:name="com.playing.lokasee.fragments.SearchFragment"
+                    style="@style/MatchParent" />
             </FrameLayout>
         </FrameLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:id="@+id/side_drawer"
             style="@style/MatchParent"
             android:layout_width="240dp"
-            android:layout_gravity="left"
-            android:background="@color/material_blue_grey_800"
-            android:orientation="vertical">
+            android:layout_gravity="left">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/bg.main.black"
-                android:orientation="horizontal"
-                android:padding="15dp">
-
-                <ImageView
-                    android:id="@+id/img_prof_side"
-                    android:layout_width="35dp"
-                    android:layout_height="35dp" />
-
-                <TextView
-                    android:id="@+id/txt_name_side"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginLeft="10dp"
-                    android:text="Mexan Juadha"
-                    android:textColor="@color/bg.white"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <RelativeLayout
-                android:id="@+id/rel_logout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="true"
-                android:layout_alignParentBottom="true"
-                android:background="@color/material_blue_grey_800"
-                android:padding="15dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Logout"
-                    android:textColor="@color/bg.white"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-            </RelativeLayout>
-        </RelativeLayout>
-
+            <include layout="@layout/side_menu" />
+        </FrameLayout>
 
     </android.support.v4.widget.DrawerLayout>
 </RelativeLayout>

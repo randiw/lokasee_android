@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:print="http://schemas.android.com/apk/res-auto"
+    style="@style/MatchParent"
+    android:background="@color/material_blue_grey_800">
+
+    <LinearLayout
+        android:id="@+id/upper_profile"
+        style="@style/FitWidth"
+        android:background="@color/bg.main.black"
+        android:orientation="horizontal"
+        android:padding="15dp">
+
+        <ImageView
+            android:id="@+id/img_prof_side"
+            android:layout_width="35dp"
+            android:layout_height="35dp" />
+
+        <TextView
+            android:id="@+id/txt_name_side"
+            style="@style/WrapContent"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:text="Mexan Juadha"
+            android:textColor="@color/bg.white"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/FitWidth"
+        android:layout_above="@+id/logout"
+        android:layout_below="@+id/upper_profile"
+        android:divider="@android:color/darker_gray"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <LinearLayout
+            android:id="@+id/loket"
+            style="@style/FitWidth"
+            android:orientation="horizontal"
+            android:layout_gravity="center_vertical"
+            android:padding="15dp">
+
+            <com.github.johnkil.print.PrintView
+                style="@style/WrapContent"
+                print:iconColor="@android:color/white"
+                print:iconSize="20dp"
+                print:iconText="@string/ic_material_cloud" />
+
+            <TextView
+                style="@style/FitWidth"
+                android:layout_marginLeft="10dp"
+                android:text="Loket.com API"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/gotix"
+            style="@style/FitWidth"
+            android:orientation="horizontal"
+            android:layout_gravity="center_vertical"
+            android:padding="15dp">
+
+            <com.github.johnkil.print.PrintView
+                style="@style/WrapContent"
+                print:iconColor="@android:color/white"
+                print:iconSize="20dp"
+                print:iconText="@string/ic_material_directions_bike" />
+
+            <TextView
+                style="@style/FitWidth"
+                android:layout_marginLeft="10dp"
+                android:text="Go-Tix Mock Server"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/logout"
+        style="@style/WrapContent"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:padding="15dp"
+        android:text="Logout"
+        android:textColor="@color/bg.white"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+</RelativeLayout>

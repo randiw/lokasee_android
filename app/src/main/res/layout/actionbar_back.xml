@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/actionbar">
+
+    <TextView
+        android:id="@+id/title"
+        style="@style/actionbar.title" />
+
+    <com.balysv.materialmenu.MaterialMenuView
+        android:id="@+id/menuIcon"
+        style="@style/actionbar.menu"
+        android:layout_width="45dp"
+        android:layout_marginLeft="5dp"
+        app:mm_color="@android:color/white" />
+
+</RelativeLayout>

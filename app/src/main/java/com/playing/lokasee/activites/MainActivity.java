@@ -1,6 +1,7 @@
 package com.playing.lokasee.activites;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
@@ -45,6 +46,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import nucleus.factory.RequiresPresenter;
 
 @RequiresPresenter(MainPresenter.class)
@@ -53,9 +55,10 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     private static final String TAG = MainActivity.class.getSimpleName();
 
     @Bind(R.id.drawer_layout) DrawerLayout drawerLayout;
-    @Bind(R.id.side_drawer) RelativeLayout sideDrawer;
+    @Bind(R.id.side_drawer) FrameLayout sideDrawer;
     @Bind(R.id.img_prof_side) ImageView profilePicture;
     @Bind(R.id.txt_name_side) TextView profileName;
+    @Bind(R.id.loket) LinearLayout loket;
     @Bind(R.id.frame_search) FrameLayout frameSearch;
 
     private MaterialMenuView materialMenu;
@@ -180,9 +183,7 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
-
         setUpMarker();
-
         setMyLocation(UserData.getLatitude(), UserData.getLongitude(), UserData.getName());
     }
 
@@ -331,6 +332,16 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         BusProvider.getInstance().unregister(this);
     }
 
+    @OnClick(R.id.loket)
+    public void openLoketMenu() {
+        getPresenter().openLoket();
+    }
+
+    @OnClick(R.id.gotix)
+    public void openGoTixMenu() {
+        getPresenter().openGotix();
+    }
+
     @Override
     public void onBackPressed() {
         if(drawerLayout.isDrawerOpen(sideDrawer)) {
@@ -340,7 +351,8 @@ public class MainActivity extends NucleusBaseActivity<MainPresenter> implements 
         if(!searchView.isIconified()) {
             closeActionBar();
         }
-        else
+        else {
             super.onBackPressed();
+        }
     }
 }

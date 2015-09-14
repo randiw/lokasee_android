@@ -46,14 +46,14 @@ public abstract class BasePresenter<T extends NucleusBaseActivity> extends RxPre
     @Override
     protected void onTakeView(T t) {
         super.onTakeView(t);
-        AppEventsLogger.activateApp(context);
+        AppEventsLogger.activateApp(getView());
         startAlarm(Alarm.SHORT);
     }
 
     @Override
     protected void onDropView() {
+        AppEventsLogger.deactivateApp(getView());
         super.onDropView();
-        AppEventsLogger.deactivateApp(context);
         startAlarm(Alarm.LONG);
     }
 

@@ -17,6 +17,7 @@ public class UserData {
     public static final String LONGITUDE = "longitude";
     public static final String URL_PROF_PIC = "url_prof_pic";
     public static final String PARSE_OBJECT_ID = "parse_object_id";
+    public static final String LOKET_TOKEN = "loket_token";
 
     public static void saveFacebookLogin(String facebook_id, String name) {
         DataHelper.saveData(FACEBOOK_ID, facebook_id);
@@ -39,6 +40,15 @@ public class UserData {
     public static void saveLocation(String latitude, String longitude) {
         DataHelper.saveData(LATITUDE, latitude);
         DataHelper.saveData(LONGITUDE, longitude);
+    }
+
+    public static void saveLoketToken(String loket_token) {
+        DataHelper.saveData(LOKET_TOKEN, loket_token);
+    }
+
+    public static String getLoketToken() {
+        String loket_token = DataHelper.getString(LOKET_TOKEN);
+        return loket_token;
     }
 
     public static String getFacebookId() {

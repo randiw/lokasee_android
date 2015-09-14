@@ -10,6 +10,7 @@ import com.parse.Parse;
 import com.playing.lokasee.helper.DataHelper;
 import com.playing.lokasee.helper.FontLibHelper;
 import com.playing.lokasee.repositories.provider.UserContentProvider;
+import com.playing.lokasee.tools.VolleyProvider;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -32,11 +33,11 @@ public class LokaseeApplication extends Application {
 
         PrintConfig.initDefault(getAssets(), getString(R.string.MaterialIconFont));
         FacebookSdk.sdkInitialize(getApplicationContext());
-        setupParse();
-
-        setupDatabase();
-
         FontLibHelper.initFace(this);
+        VolleyProvider.init(this);
+
+        setupParse();
+        setupDatabase();
     }
 
     public static synchronized LokaseeApplication getInstance() {

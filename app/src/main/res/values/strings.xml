@@ -4,6 +4,8 @@
     <string name="parse_client_id">FP5864k1ryudSZjTNGhrtltuYTe1qWwzjM2TuQnR</string>
     <string name="facebook_app_id">931534460236585</string>
 
+    <string name="loket_apikey">sandbox-60DaXk1t3K7K14S7qW9528bUdc9R2p9d</string>
+
     <!-- fonts -->
     <string name="Harabara">fonts/harabara_font.otf</string>
     <string name="MaterialIconFont">fonts/material-icon-font.ttf</string>

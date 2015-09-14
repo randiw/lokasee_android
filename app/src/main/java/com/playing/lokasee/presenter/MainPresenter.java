@@ -1,5 +1,6 @@
 package com.playing.lokasee.presenter;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -9,7 +10,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.playing.lokasee.User;
+import com.playing.lokasee.activites.LoketActivity;
 import com.playing.lokasee.activites.MainActivity;
+import com.playing.lokasee.activites.MockGoTixActivity;
 import com.playing.lokasee.events.ReturnSearchEvent;
 import com.playing.lokasee.events.UpdateLocationEvent;
 import com.playing.lokasee.helper.BusProvider;
@@ -37,6 +40,14 @@ public class MainPresenter extends BasePresenter<MainActivity> {
                 Log.e(TAG, "parse query user exception: " + pe.getMessage());
             }
         });
+    }
+
+    public void openLoket() {
+        getView().startActivity(new Intent(getView(), LoketActivity.class));
+    }
+
+    public void openGotix() {
+        getView().startActivity(new Intent(getView(), MockGoTixActivity.class));
     }
 
     @Subscribe
